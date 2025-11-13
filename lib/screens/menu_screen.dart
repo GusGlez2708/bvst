@@ -1,0 +1,97 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class MenuScreen extends StatelessWidget {
+  const MenuScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            colors: [Color(0xFF0D1B2A), Color(0xFF000000)],
+            center: Alignment.center,
+            radius: 0.8,
+          ),
+        ),
+        child: Stack(
+          children: [
+            const Positioned.fill(
+              child: GridPaper(
+                color: Color(0x1AFFFFFF),
+                divisions: 1,
+                subdivisions: 1,
+                interval: 100,
+              ),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Battle Chase',
+                    style: GoogleFonts.orbitron(
+                      fontSize: 64,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF61E2FF),
+                      shadows: [
+                        const Shadow(
+                          blurRadius: 20.0,
+                          color: Color(0xFF61E2FF),
+                          offset: Offset(0, 0),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 70),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/game');
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF00A2B8), Color(0xFF00F0FF)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(color: const Color(0xFF61E2FF), width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF00F0FF).withOpacity(0.4),
+                            blurRadius: 15,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 0),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        'JUGAR',
+                        style: GoogleFonts.pressStart2p(
+                          fontSize: 24,
+                          color: Colors.white,
+                          shadows: [
+                            const Shadow(
+                              blurRadius: 10.0,
+                              color: Colors.black,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
