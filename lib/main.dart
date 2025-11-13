@@ -1,11 +1,15 @@
+import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/screens/game_screen.dart';
 import 'package:bvst/screens/menu_screen.dart';
 import 'package:bvst/screens/result_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await AudioManager().preloadAllAudio();
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,

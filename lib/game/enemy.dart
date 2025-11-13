@@ -33,7 +33,7 @@ class Enemy extends SpriteComponent with HasGameReference<BattleGame>, Collision
 
   void _shoot() {
     if (!canShoot) return;
-    AudioManager().playSfx('drop.mp3');
+    AudioManager().playGameSfx('drop.mp3');
     final bullet = Bullet(
       isPlayerBullet: false,
       position: position + Vector2(0, size.y / 2),
@@ -90,7 +90,7 @@ class Enemy extends SpriteComponent with HasGameReference<BattleGame>, Collision
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
     if (other is Bullet && other.isPlayerBullet) {
-      AudioManager().playSfx('damage_ene.mp3');
+      AudioManager().playGameSfx('damage_ene.mp3');
       health--;
       other.removeFromParent();
       game.checkWinCondition();

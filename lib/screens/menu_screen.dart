@@ -2,8 +2,22 @@ import 'package:bvst/game/audio_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class MenuScreen extends StatelessWidget {
+// 1. Convertir a StatefulWidget
+class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
+
+  @override
+  State<MenuScreen> createState() => _MenuScreenState();
+}
+
+class _MenuScreenState extends State<MenuScreen> {
+  
+  @override
+  void initState() {
+    super.initState();
+    // 2. Reproducir música del menú al entrar a la pantalla
+    AudioManager().playMenuBgm();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +64,13 @@ class MenuScreen extends StatelessWidget {
                   const SizedBox(height: 70),
                   GestureDetector(
                     onTap: () {
-                      AudioManager().reset();
-                      AudioManager().preloadSfx();
-                      AudioManager().playSfx('start.mp3');
-                      Navigator.pushNamed(context, '/game');
-                    },
+                  // NO uses stopMenuBgm(), usa la nueva función de UI
+                  AudioManager().playUiSfx('start.mp3'); 
+                
+                  // Ya NO llamamos a reset() ni a preloadSfx()
+                
+                  Navigator.pushNamed(context, '/game');
+                },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
                       decoration: BoxDecoration(

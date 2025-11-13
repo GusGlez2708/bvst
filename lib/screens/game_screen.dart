@@ -24,22 +24,23 @@ class _GameScreenState extends State<GameScreen> {
     _game = BattleGame(
       onGameOver: (hasWon) {
         if (mounted) {
-          AudioManager().stopBgm();
+          _game.pauseEngine(); 
+        
+          // Detiene la música del JUEGO (no todo)
+          AudioManager().stopGameBgm();
+
+          // Reproduce el sonido de UI de victoria/derrota
           if (hasWon) {
-            // Logic for winning
-            Navigator.pushReplacementNamed(
-              context,
-              '/result',
-              arguments: {'hasWon': true},
-            );
+            AudioManager().playUiSfx('victory.mp3'); // (Añade este archivo)
           } else {
-            // Logic for losing
-            Navigator.pushReplacementNamed(
-              context,
-              '/result',
-              arguments: {'hasWon': false},
-            );
+            AudioManager().playUiSfx('defeat.mp3'); // (Añade este archivo)
           }
+
+          Navigator.pushReplacementNamed(
+            context,
+            '/result',
+            arguments: {'hasWon': hasWon},
+          );
         }
       },
     );
@@ -54,7 +55,10 @@ class _GameScreenState extends State<GameScreen> {
         });
       } else {
         _timer?.cancel();
-        AudioManager().startBgm();
+      
+        // 5. Inicia la música del JUEGO (no la del menú)
+        AudioManager().playGameBgm(); 
+      
         setState(() {
           _isCountingDown = false;
           _game.player.startBehavior();

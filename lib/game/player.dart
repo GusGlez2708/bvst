@@ -51,7 +51,7 @@ class Player extends SpriteComponent with HasGameReference<BattleGame>, Collisio
 
   void shoot() {
     if (_canShoot) {
-      AudioManager().playSfx('laser.mp3');
+      AudioManager().playGameSfx('laser.mp3');
       final bullet = Bullet(
         isPlayerBullet: true,
         position: position + Vector2(0, -size.y / 2),
@@ -66,7 +66,7 @@ class Player extends SpriteComponent with HasGameReference<BattleGame>, Collisio
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
     if (other is Bullet && !other.isPlayerBullet) {
-      AudioManager().playSfx('damage_prota.mp3');
+      AudioManager().playGameSfx('damage_prota.mp3');
       health--;
       other.removeFromParent();
       game.checkWinCondition();

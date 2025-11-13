@@ -1,3 +1,4 @@
+import 'package:bvst/game/audio_manager.dart'; // 1. Importar
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -37,6 +38,10 @@ class ResultScreen extends StatelessWidget {
               const SizedBox(height: 50),
               ElevatedButton(
                 onPressed: () {
+                  // 2. Detener TODOS los sonidos (el de victoria/derrota)
+                  AudioManager().stopAllAudio(); 
+                
+                  // 3. Volver al menú (esto es correcto)
                   Navigator.pushNamedAndRemoveUntil(context, '/menu', (route) => false);
                 },
                 style: ElevatedButton.styleFrom(
