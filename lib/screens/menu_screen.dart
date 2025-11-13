@@ -1,29 +1,9 @@
-import 'package:flame_audio/flame_audio.dart';
+import 'package:bvst/game/audio_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class MenuScreen extends StatefulWidget {
+class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
-
-  @override
-  State<MenuScreen> createState() => _MenuScreenState();
-}
-
-class _MenuScreenState extends State<MenuScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Stop any previously playing music and start from scratch.
-    FlameAudio.bgm.stop().then((_) {
-      FlameAudio.loop('bg_music.mp3', volume: 0.5);
-    });
-  }
-
-  @override
-  void dispose() {
-    FlameAudio.bgm.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,18 +50,10 @@ class _MenuScreenState extends State<MenuScreen> {
                   const SizedBox(height: 70),
                   GestureDetector(
                     onTap: () {
-                      FlameAudio.bgm.audioPlayer.setVolume(0.2);
-                      FlameAudio.play('start.mp3').then((_) {
-                        if (mounted) {
-                          Navigator.pushNamed(context, '/game');
-                        }
-                      });
-
-                      Future.delayed(const Duration(seconds: 2), () {
-                        if (mounted) {
-                          FlameAudio.bgm.audioPlayer.setVolume(0.5);
-                        }
-                      });
+                      AudioManager().reset();
+                      AudioManager().preloadSfx();
+                      AudioManager().playSfx('start.mp3');
+                      Navigator.pushNamed(context, '/game');
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),

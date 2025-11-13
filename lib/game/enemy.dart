@@ -3,7 +3,7 @@ import 'package:bvst/game/battle_game.dart';
 import 'package:bvst/game/bullet.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:flame_audio/flame_audio.dart';
+import 'package:bvst/game/audio_manager.dart';
 
 class Enemy extends SpriteComponent with HasGameReference<BattleGame>, CollisionCallbacks {
   int health = 15;
@@ -29,12 +29,11 @@ class Enemy extends SpriteComponent with HasGameReference<BattleGame>, Collision
     add(RectangleHitbox());
 
     _shootTimer = Timer(1.5, onTick: _shoot, repeat: true);
-    _shootTimer.start();
   }
 
   void _shoot() {
     if (!canShoot) return;
-    FlameAudio.play('drop.mp3');
+    AudioManager().playSfx('drop.mp3');
     final bullet = Bullet(
       isPlayerBullet: false,
       position: position + Vector2(0, size.y / 2),
@@ -45,6 +44,7 @@ class Enemy extends SpriteComponent with HasGameReference<BattleGame>, Collision
   void startBehavior() {
     canShoot = true;
     speed = 200.0;
+    _shootTimer.start();
   }
 
   @override
@@ -90,7 +90,7 @@ class Enemy extends SpriteComponent with HasGameReference<BattleGame>, Collision
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
     if (other is Bullet && other.isPlayerBullet) {
-      FlameAudio.play('damage_ene.mp3');
+      AudioManager().playSfx('damage_ene.mp3');
       health--;
       other.removeFromParent();
       game.checkWinCondition();

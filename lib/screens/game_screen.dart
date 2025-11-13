@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/game/battle_game.dart';
 import 'package:flame/game.dart';
-import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -24,14 +24,22 @@ class _GameScreenState extends State<GameScreen> {
     _game = BattleGame(
       onGameOver: (hasWon) {
         if (mounted) {
+          AudioManager().stopBgm();
           if (hasWon) {
-            FlameAudio.bgm.pause();
+            // Logic for winning
+            Navigator.pushReplacementNamed(
+              context,
+              '/result',
+              arguments: {'hasWon': true},
+            );
+          } else {
+            // Logic for losing
+            Navigator.pushReplacementNamed(
+              context,
+              '/result',
+              arguments: {'hasWon': false},
+            );
           }
-          Navigator.pushReplacementNamed(
-            context,
-            '/result',
-            arguments: {'hasWon': hasWon},
-          );
         }
       },
     );
@@ -46,6 +54,7 @@ class _GameScreenState extends State<GameScreen> {
         });
       } else {
         _timer?.cancel();
+        AudioManager().startBgm();
         setState(() {
           _isCountingDown = false;
           _game.player.startBehavior();

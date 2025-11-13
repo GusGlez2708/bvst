@@ -9,6 +9,7 @@ class BattleGame extends FlameGame with HasCollisionDetection {
   late Player player;
   late Enemy enemy;
   late Sprite heartSprite;
+  bool _isGameOver = false;
 
   BattleGame({required this.onGameOver});
 
@@ -39,9 +40,13 @@ class BattleGame extends FlameGame with HasCollisionDetection {
   }
 
   void checkWinCondition() {
+    if (_isGameOver) return;
+
     if (enemy.health <= 0) {
+      _isGameOver = true;
       onGameOver(true);
     } else if (player.health <= 0) {
+      _isGameOver = true;
       onGameOver(false);
     }
   }
