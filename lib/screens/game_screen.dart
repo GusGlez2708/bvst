@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:bvst/game/battle_game.dart';
 import 'package:flame/game.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -23,6 +24,9 @@ class _GameScreenState extends State<GameScreen> {
     _game = BattleGame(
       onGameOver: (hasWon) {
         if (mounted) {
+          if (hasWon) {
+            FlameAudio.bgm.pause();
+          }
           Navigator.pushReplacementNamed(
             context,
             '/result',
@@ -60,7 +64,7 @@ class _GameScreenState extends State<GameScreen> {
   Widget _buildButton(IconData icon, VoidCallback onPressed, {Color color = const Color(0xFF2196F3)}) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: color.withOpacity(0.8),
+        backgroundColor: color.withAlpha((255 * 0.8).round()),
         shape: const CircleBorder(),
         padding: const EdgeInsets.all(20),
         elevation: 4,
@@ -79,7 +83,7 @@ class _GameScreenState extends State<GameScreen> {
         width: 70,
         height: 70,
         decoration: BoxDecoration(
-          color: const Color(0xFF2196F3).withOpacity(0.8),
+          color: const Color(0xFF2196F3).withAlpha((255 * 0.8).round()),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white, size: 30),
@@ -90,14 +94,31 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       resizeToAvoidBottomInset: false,
       body: SafeArea(
+        top: false,
+        bottom: false,
         child: Stack(
           children: [
-            GameWidget(game: _game),
+            GameWidget(
+              game: _game,
+              backgroundBuilder: (context) {
+                return Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/fondo.png'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                );
+              },
+            ),
             if (_isCountingDown)
               Container(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withAlpha((255 * 0.5).round()),
                 child: Center(
                   child: Text(
                     _countdown > 0 ? _countdown.toString() : '¡YA!',

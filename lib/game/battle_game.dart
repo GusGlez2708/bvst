@@ -16,10 +16,6 @@ class BattleGame extends FlameGame with HasCollisionDetection {
   Future<void> onLoad() async {
     await super.onLoad();
     
-    final background = SpriteComponent()
-      ..sprite = await Sprite.load('fondo.png')
-      ..size = size;
-    add(background);
 
     player = Player();
     enemy = Enemy();

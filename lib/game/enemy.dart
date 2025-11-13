@@ -3,8 +3,9 @@ import 'package:bvst/game/battle_game.dart';
 import 'package:bvst/game/bullet.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame_audio/flame_audio.dart';
 
-class Enemy extends SpriteComponent with HasGameRef<BattleGame>, CollisionCallbacks {
+class Enemy extends SpriteComponent with HasGameReference<BattleGame>, CollisionCallbacks {
   int health = 15;
   late int maxHealth;
   double speed = 0.0;
@@ -20,11 +21,11 @@ class Enemy extends SpriteComponent with HasGameRef<BattleGame>, CollisionCallba
     sprite = await Sprite.load('enemigo.png');
     maxHealth = health;
 
-    double newHeight = gameRef.size.y * 0.18;
+    double newHeight = game.size.y * 0.18;
     double newWidth = (sprite!.originalSize.x / sprite!.originalSize.y) * newHeight;
     size = Vector2(newWidth, newHeight);
 
-    position = Vector2(gameRef.size.x / 2, size.y / 2 + 50);
+    position = Vector2(game.size.x / 2, size.y / 2 + 50);
     add(RectangleHitbox());
 
     _shootTimer = Timer(1.5, onTick: _shoot, repeat: true);
@@ -33,11 +34,12 @@ class Enemy extends SpriteComponent with HasGameRef<BattleGame>, CollisionCallba
 
   void _shoot() {
     if (!canShoot) return;
+    FlameAudio.play('drop.mp3');
     final bullet = Bullet(
       isPlayerBullet: false,
       position: position + Vector2(0, size.y / 2),
     );
-    gameRef.add(bullet);
+    game.add(bullet);
   }
 
   void startBehavior() {
@@ -77,20 +79,21 @@ class Enemy extends SpriteComponent with HasGameRef<BattleGame>, CollisionCallba
 
     position.x += speed * direction * dt;
 
-    if (position.x <= size.x / 2 || position.x >= gameRef.size.x - size.x / 2) {
+    if (position.x <= size.x / 2 || position.x >= game.size.x - size.x / 2) {
       direction *= -1;
     }
     
-    position.x = position.x.clamp(size.x / 2, gameRef.size.x - size.x / 2);
+    position.x = position.x.clamp(size.x / 2, game.size.x - size.x / 2);
   }
 
   @override
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
     if (other is Bullet && other.isPlayerBullet) {
+      FlameAudio.play('damage_ene.mp3');
       health--;
       other.removeFromParent();
-      gameRef.checkWinCondition();
+      game.checkWinCondition();
     }
   }
 }

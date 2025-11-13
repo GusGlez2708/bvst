@@ -2,7 +2,7 @@ import 'package:bvst/game/battle_game.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 
-class Bullet extends SpriteComponent with HasGameRef<BattleGame>, CollisionCallbacks {
+class Bullet extends SpriteComponent with HasGameReference<BattleGame>, CollisionCallbacks {
   final bool isPlayerBullet;
   final double _speed = 400.0;
 
@@ -19,7 +19,7 @@ class Bullet extends SpriteComponent with HasGameRef<BattleGame>, CollisionCallb
       isPlayerBullet ? 'bala_personaje.png' : 'bala_enemigo.png',
     );
 
-    double newHeight = gameRef.size.y * 0.04;
+    double newHeight = game.size.y * 0.04;
     double newWidth = (sprite!.originalSize.x / sprite!.originalSize.y) * newHeight;
     size = Vector2(newWidth, newHeight);
     
@@ -35,7 +35,7 @@ class Bullet extends SpriteComponent with HasGameRef<BattleGame>, CollisionCallb
       position.y += _speed * dt;
     }
 
-    if (position.y < 0 || position.y > gameRef.size.y) {
+    if (position.y < 0 || position.y > game.size.y) {
       removeFromParent();
     }
   }

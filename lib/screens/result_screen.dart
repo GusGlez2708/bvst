@@ -45,7 +45,7 @@ class ResultScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  shadowColor: Colors.black.withOpacity(0.5),
+                  shadowColor: Colors.black.withAlpha((255 * 0.5).round()),
                   elevation: 10,
                 ),
                 child: Text(
