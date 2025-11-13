@@ -53,16 +53,16 @@ class AudioManager {
       'start.mp3',
       'bg_music.mp3',
       // Recuerda añadir estos:
-      // 'menu_music.mp3',
-      // 'victory.mp3',
-      // 'defeat.mp3',
+       'menu_music.mp3',
+       'victory.mp3',
+       'defeat.mp3',
     ]);
   }
 
   /// 2. Control de Música del Menú
   void playMenuBgm() {
     stopAllAudio(); // Detiene todo lo demás
-    // FlameAudio.bgm.play('menu_music.mp3'); // Descomenta cuando tengas el archivo
+     FlameAudio.bgm.play('menu_music.mp3'); // Descomenta cuando tengas el archivo
     _isMenuMusicPlaying = true;
   }
 
