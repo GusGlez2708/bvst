@@ -5,6 +5,8 @@ import 'package:bvst/screens/result_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:bvst/screens/options_screen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -34,6 +36,7 @@ class MyApp extends StatelessWidget {
         '/menu': (context) => const MenuScreen(),
         '/game': (context) => const GameScreen(),
         '/result': (context) => const ResultScreen(),
+        '/options': (context) => const OptionsScreen(),
       },
     );
   }

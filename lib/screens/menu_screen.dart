@@ -66,7 +66,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 _buildStyledButton(
                   text: 'OPCIONES',
                   onTap: () {
-                    print('Navegar a Opciones');
+                    Navigator.pushNamed(context, '/options');
                   },
                 ),
                 const SizedBox(height: 15),
