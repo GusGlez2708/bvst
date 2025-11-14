@@ -1,3 +1,4 @@
+// lib/screens/game_screen.dart
 import 'dart:async';
 import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/game/battle_game.dart';
@@ -24,16 +25,13 @@ class _GameScreenState extends State<GameScreen> {
     _game = BattleGame(
       onGameOver: (hasWon) {
         if (mounted) {
-          _game.pauseEngine(); 
-        
-          // Detiene la música del JUEGO (no todo)
+          _game.pauseEngine();
           AudioManager().stopGameBgm();
 
-          // Reproduce el sonido de UI de victoria/derrota
           if (hasWon) {
-            AudioManager().playUiSfx('victory.mp3'); // (Añade este archivo)
+            AudioManager().playUiSfx('victory.mp3');
           } else {
-            AudioManager().playUiSfx('defeat.mp3'); // (Añade este archivo)
+            AudioManager().playUiSfx('defeat.mp3');
           }
 
           Navigator.pushReplacementNamed(
@@ -53,12 +51,14 @@ class _GameScreenState extends State<GameScreen> {
         setState(() {
           _countdown--;
         });
+      } else if (_countdown == 1) {
+        // Añadido para que muestre ¡YA!
+        setState(() {
+          _countdown--;
+        });
       } else {
         _timer?.cancel();
-      
-        // 5. Inicia la música del JUEGO (no la del menú)
-        AudioManager().playGameBgm(); 
-      
+        AudioManager().playGameBgm();
         setState(() {
           _isCountingDown = false;
           _game.player.startBehavior();
@@ -74,32 +74,74 @@ class _GameScreenState extends State<GameScreen> {
     super.dispose();
   }
 
-  Widget _buildButton(IconData icon, VoidCallback onPressed, {Color color = const Color(0xFF2196F3)}) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color.withAlpha((255 * 0.8).round()),
-        shape: const CircleBorder(),
-        padding: const EdgeInsets.all(20),
-        elevation: 4,
+  // --- WIDGET: JOYSTICK DE MOVIMIENTO ---
+  Widget _buildMovementJoystick() {
+    return GestureDetector(
+      // Se activa cuando el usuario arrastra el dedo
+      onPanUpdate: (details) {
+        // Si el movimiento es significativamente a la derecha
+        if (details.delta.dx > 1.0) {
+          _game.player.moveRight(); // <-- Llama al nuevo método
+        } 
+        // Si el movimiento es significativamente a la izquierda
+        else if (details.delta.dx < -1.0) {
+          _game.player.moveLeft(); // <-- Llama al nuevo método
+        }
+      },
+      // Se activa cuando el usuario levanta el dedo
+      onPanEnd: (details) {
+        _game.player.stopMoving(); // <-- Llama al nuevo método
+      },
+      // También detiene el movimiento si el gesto se cancela
+      onPanCancel: () {
+        _game.player.stopMoving(); // <-- Llama al nuevo método
+      },
+      // La parte visual del "joystick"
+      child: Container(
+        width: 140, // Más pequeño para que quepa bien
+        height: 70, 
+        decoration: BoxDecoration(
+          color: const Color(0xFF2196F3).withOpacity(0.3), // Azul semitransparente
+          borderRadius: BorderRadius.circular(35), // Forma de píldora
+          border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.swap_horiz, 
+            color: Colors.white,
+            size: 40,
+          ),
+        ),
       ),
-      onPressed: onPressed,
-      child: Icon(icon, color: Colors.white, size: 30),
     );
   }
 
-  Widget _buildMoveButton(IconData icon, {required Function(bool) onStateChanged}) {
+  // --- WIDGET: BOTÓN DE DISPARO ATRACTIVO ---
+  Widget _buildAttractiveShootButton() {
     return GestureDetector(
-      onTapDown: (_) => onStateChanged(true),
-      onTapUp: (_) => onStateChanged(false),
-      onTapCancel: () => onStateChanged(false),
+      onTap: _game.player.shoot, // Llama al método shoot
       child: Container(
-        width: 70,
+        width: 70, // Tamaño del botón
         height: 70,
         decoration: BoxDecoration(
-          color: const Color(0xFF2196F3).withAlpha((255 * 0.8).round()),
-          shape: BoxShape.circle,
+          color: const Color(0xFFFF9500).withOpacity(0.8), // Naranja (como en base2.md)
+          shape: BoxShape.circle, 
+          border: Border.all(color: Colors.white.withOpacity(0.8), width: 3),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFFF9500).withOpacity(0.5),
+              blurRadius: 10,
+              spreadRadius: 2,
+            ),
+          ],
         ),
-        child: Icon(icon, color: Colors.white, size: 30),
+        child: const Center(
+          child: Icon(
+            Icons.arrow_upward, // Icono de flecha arriba (como en base2.md)
+            color: Colors.white,
+            size: 40,
+          ),
+        ),
       ),
     );
   }
@@ -114,6 +156,7 @@ class _GameScreenState extends State<GameScreen> {
         bottom: false,
         child: Stack(
           children: [
+            // El fondo se maneja en el GameWidget
             GameWidget(
               game: _game,
               backgroundBuilder: (context) {
@@ -129,12 +172,14 @@ class _GameScreenState extends State<GameScreen> {
                 );
               },
             ),
+            
+            // --- SUPERPOSICIÓN DE CONTROLES (HUD) ---
             if (_isCountingDown)
               Container(
-                color: Colors.black.withAlpha((255 * 0.5).round()),
+                color: Colors.black.withAlpha(150),
                 child: Center(
                   child: Text(
-                    _countdown > 0 ? _countdown.toString() : '¡YA!',
+                    _countdown > 0 ? _countdown.toString() : '¡YA!', // Muestra ¡YA!
                     style: GoogleFonts.orbitron(
                       fontSize: 100,
                       fontWeight: FontWeight.bold,
@@ -143,39 +188,27 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ),
               ),
+            
+            // --- CONTROLES DE JUEGO (ACTUALIZADOS) ---
             if (!_isCountingDown)
               Positioned(
-                bottom: 30,
-                left: 20,
+                bottom: 30, // Posición desde abajo
+                left: 30,  // Margen izquierdo
+                right: 30, // Margen derecho
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _buildMoveButton(
-                      Icons.arrow_left,
-                      onStateChanged: (isPressed) => _game.player.isMovingLeft = isPressed,
-                    ),
-                    const SizedBox(width: 20),
-                    _buildMoveButton(
-                      Icons.arrow_right,
-                      onStateChanged: (isPressed) => _game.player.isMovingRight = isPressed,
-                    ),
+                    // Lado izquierdo: Joystick de movimiento
+                    _buildMovementJoystick(),
+                    
+                    // Lado derecho: Botón de disparo
+                    _buildAttractiveShootButton(),
                   ],
                 ),
               ),
-            if (!_isCountingDown)
-              Positioned(
-                bottom: 30,
-                right: 30,
-                child: SizedBox(
-                  width: 80,
-                  height: 80,
-                  child: _buildButton(
-                    Icons.arrow_upward,
-                    () => _game.player.shoot(),
-                    color: const Color(0xFFFF9500),
-                  ),
-                ),
-              ),
           ],
+          
         ),
       ),
     );
