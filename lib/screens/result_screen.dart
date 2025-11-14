@@ -12,38 +12,35 @@ class ResultScreen extends StatefulWidget {
 class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  bool _isButtonEnabled = false; // Controla si el botón es clickeable
+  bool _isButtonEnabled = false; 
 
   @override
   void initState() {
     super.initState();
-    // 1. Configuración de la animación de fundido
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1), // Duración del fundido (1 segundo)
+      duration: const Duration(seconds: 1),
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_animationController)
       ..addListener(() {
-        setState(() {}); // Redibuja el widget a medida que la opacidad cambia
+        setState(() {});
       })
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           setState(() {
-            _isButtonEnabled = true; // Habilita el botón una vez que la animación termina
+            _isButtonEnabled = true;
           });
         }
       });
 
-    // Inicia la animación después de un pequeño retraso
-    // para que primero se vea la pantalla de victoria/derrota
     Future.delayed(const Duration(seconds: 1), () {
-      _animationController.forward(); // Inicia la animación de fundido
+      _animationController.forward();
     });
   }
 
   @override
   void dispose() {
-    _animationController.dispose(); // Libera recursos del controlador de animación
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -53,7 +50,23 @@ class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderSt
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final bool hasWon = args['hasWon'];
 
-    // 2. Determina el fondo y el texto del botón según si ganó o perdió
+    // --- LÓGICA DE COLOR CONDICIONAL ---
+    final Color primaryButtonColor;
+    final Color primaryTextColor;
+    final Color primaryBorderColor;
+
+    if (hasWon) {
+      // Estilo AZUL para "YOU WIN"
+      primaryButtonColor = const Color(0xFF4FA0E4); // Azul claro
+      primaryTextColor = Colors.white;
+      primaryBorderColor = const Color(0xFF88D4F7); // Borde azul más claro
+    } else {
+      // Estilo ROJO para "GAME OVER"
+      primaryButtonColor = const Color(0xFFD9534F); // Rojo
+      primaryTextColor = Colors.white;
+      primaryBorderColor = const Color(0xFFB94A48); // Borde rojo oscuro
+    }
+
     final String backgroundImage =
         hasWon ? 'assets/images/you_win_bg.png' : 'assets/images/game_over_bg.png';
     
@@ -62,7 +75,7 @@ class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderSt
     return Scaffold(
       body: Stack(
         children: [
-          // --- Fondo de pantalla de victoria o derrota ---
+          // --- Fondo de pantalla ---
           Positioned.fill(
             child: Image.asset(
               backgroundImage,
@@ -70,22 +83,25 @@ class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderSt
             ),
           ),
 
-          // --- Botón "VOLVER AL MENÚ" (con animación de fundido) ---
+          // --- Botón posicionado ---
           Align(
-            alignment: const Alignment(0.0, 0.8), // Posiciona el botón en la parte inferior
-            child: Opacity(
-              opacity: _fadeAnimation.value, // Controla la opacidad con la animación
-              child: _buildStyledButton(
-                text: buttonText,
-                onTap: _isButtonEnabled // Solo es clickeable si la animación terminó
-                    ? () {
-                        // Detiene el sonido de victoria/derrota
-                        AudioManager().stopAllAudio();
-                        // Vuelve al menú (donde se iniciará la música del menú)
-                        Navigator.pushNamedAndRemoveUntil(context, '/menu', (route) => false);
-                      }
-                    : null, // Deshabilita el botón si no es clickeable
+            alignment: const Alignment(0.0, 0.65), // Posición (más arriba)
+            // ¡Ya no usamos el widget Opacity aquí!
+            child: _buildStyledButton(
+              text: buttonText,
+              colors: (
+                button: primaryButtonColor,
+                text: primaryTextColor,
+                border: primaryBorderColor,
               ),
+              // Pasamos el valor de la animación directamente al botón
+              opacity: _fadeAnimation.value,
+              onTap: _isButtonEnabled
+                  ? () {
+                      AudioManager().stopAllAudio();
+                      Navigator.pushNamedAndRemoveUntil(context, '/menu', (route) => false);
+                    }
+                  : null,
             ),
           ),
         ],
@@ -93,24 +109,34 @@ class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderSt
     );
   }
 
-  /// Widget auxiliar para los botones con el estilo del menú
-  Widget _buildStyledButton({required String text, required VoidCallback? onTap}) {
-    // Si onTap es null (botón deshabilitado), usa un color más oscuro para indicarlo
-    final Color buttonColor = onTap != null ? Colors.white : Colors.grey.shade600;
-    final Color textColor = onTap != null ? const Color(0xFF2C3454) : Colors.grey.shade400;
+  /// --- WIDGET DE BOTÓN ACTUALIZADO ---
+  /// Ahora acepta 'opacity' para animar sus propios colores
+  Widget _buildStyledButton({
+    required String text,
+    required VoidCallback? onTap,
+    required ({Color button, Color text, Color border}) colors,
+    required double opacity, // Parámetro de opacidad de la animación
+  }) {
+    // --- NUEVA LÓGICA DE COLOR ---
+    // Aplicamos la opacidad de la animación directamente a los colores base.
+    // Ya no usamos un color "gris" de deshabilitado.
+    final Color buttonColor = colors.button.withOpacity(opacity);
+    final Color textColor = colors.text.withOpacity(opacity);
+    final Color borderColor = colors.border.withOpacity(opacity);
+    final Color shadowColor = Colors.black.withOpacity(0.3 * opacity); // La sombra también se difumina
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: onTap, // Sigue siendo nulo hasta que _isButtonEnabled es true, previniendo clics
       child: Container(
-        width: 280, // Ancho adecuado para "VOLVER AL MENÚ"
-        height: 55, // Alto del botón
+        width: 280,
+        height: 55,
         decoration: BoxDecoration(
-          color: buttonColor,
+          color: buttonColor, // Color de fondo (rojo/azul) con opacidad animada
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade400, width: 2),
+          border: Border.all(color: borderColor, width: 2), // Borde con opacidad animada
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: shadowColor, // Sombra con opacidad animada
               spreadRadius: 2,
               blurRadius: 5,
               offset: const Offset(0, 3),
@@ -123,33 +149,33 @@ class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderSt
             Text(
               text,
               style: GoogleFonts.pressStart2p(
-                color: textColor,
+                color: textColor, // Texto con opacidad animada
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            // Remaches
-            Positioned(top: 5, left: 5, child: _buildRivets()),
-            Positioned(top: 5, right: 5, child: _buildRivets()),
-            Positioned(bottom: 5, left: 5, child: _buildRivets()),
-            Positioned(bottom: 5, right: 5, child: _buildRivets()),
+            // Remaches (también reciben la opacidad)
+            Positioned(top: 5, left: 5, child: _buildRivets(opacity: opacity)),
+            Positioned(top: 5, right: 5, child: _buildRivets(opacity: opacity)),
+            Positioned(bottom: 5, left: 5, child: _buildRivets(opacity: opacity)),
+            Positioned(bottom: 5, right: 5, child: _buildRivets(opacity: opacity)),
           ],
         ),
       ),
     );
   }
 
-  /// Widget para crear un "remache" individual
-  Widget _buildRivets() {
+  /// Widget para crear un "remache" individual (ahora acepta opacidad)
+  Widget _buildRivets({required double opacity}) {
     return Container(
       width: 8,
       height: 8,
       decoration: BoxDecoration(
-        color: Colors.grey.shade600,
+        color: Colors.grey.shade600.withOpacity(opacity), // Color con opacidad animada
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
+            color: Colors.black.withOpacity(0.4 * opacity), // Sombra con opacidad animada
             offset: const Offset(0, 1),
             blurRadius: 1,
           ),
