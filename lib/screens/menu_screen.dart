@@ -2,7 +2,6 @@ import 'package:bvst/game/audio_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// 1. Convertir a StatefulWidget
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
 
@@ -15,102 +14,156 @@ class _MenuScreenState extends State<MenuScreen> {
   @override
   void initState() {
     super.initState();
-    // 2. Reproducir música del menú al entrar a la pantalla
+    // Inicia la música del menú
     AudioManager().playMenuBgm();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            colors: [Color(0xFF0D1B2A), Color(0xFF000000)],
-            center: Alignment.center,
-            radius: 0.8,
-          ),
-        ),
-        child: Stack(
-          children: [
-            const Positioned.fill(
-              child: GridPaper(
-                color: Color(0x1AFFFFFF),
-                divisions: 1,
-                subdivisions: 1,
-                interval: 100,
-              ),
+      body: Stack(
+        children: [
+          
+          // --- 1. FONDO DE PANTALLA ---
+          // Tu imagen de fondo con el título y el cuadro verde.
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/menu.png', // Asegúrate de que sea tu imagen correcta
+              fit: BoxFit.cover, 
             ),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Battle Chase',
-                    style: GoogleFonts.orbitron(
-                      fontSize: 64,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF61E2FF),
-                      shadows: [
-                        const Shadow(
-                          blurRadius: 20.0,
-                          color: Color(0xFF61E2FF),
-                          offset: Offset(0, 0),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 70),
-                  GestureDetector(
-                    onTap: () {
-                  // NO uses stopMenuBgm(), usa la nueva función de UI
-                  AudioManager().playUiSfx('start.mp3'); 
+          ),
+
+          // --- 2. COLUMNA DE BOTONES (POSICIONADA) ---
+          Align(
+            // Ajusta este valor vertical para mover los botones arriba/abajo.
+            // Empezamos con 0.3 (30% abajo del centro) como base.
+            // Si el título aún se tapa, puedes probar 0.4 o 0.5.
+            alignment: const Alignment(0.0, 0.4), // Centrado H, un poco más abajo del centro V
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // La columna solo ocupa el espacio necesario
+              children: [
                 
-                  // Ya NO llamamos a reset() ni a preloadSfx()
-                
-                  Navigator.pushNamed(context, '/game');
-                },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF00A2B8), Color(0xFF00F0FF)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(color: const Color(0xFF61E2FF), width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF00F0FF).withAlpha((255 * 0.4).round()),
-                            blurRadius: 15,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 0),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        'JUGAR',
-                        style: GoogleFonts.pressStart2p(
-                          fontSize: 24,
-                          color: Colors.white,
-                          shadows: [
-                            const Shadow(
-                              blurRadius: 10.0,
-                              color: Colors.black,
-                              offset: Offset(2, 2),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                // Botón JUGAR
+                _buildStyledButton(
+                  text: 'JUGAR',
+                  onTap: () {
+                    AudioManager().playUiSfx('start.mp3');
+                    Navigator.pushNamed(context, '/game');
+                  },
+                ),
+                const SizedBox(height: 15), // Espacio entre botones (reducido)
+
+                // Botón TIENDA
+                _buildStyledButton(
+                  text: 'TIENDA',
+                  onTap: () {
+                    print('Navegar a Tienda');
+                  },
+                ),
+                const SizedBox(height: 15),
+
+                // Botón OPCIONES
+                _buildStyledButton(
+                  text: 'OPCIONES',
+                  onTap: () {
+                    print('Navegar a Opciones');
+                  },
+                ),
+                const SizedBox(height: 15),
+
+                // Botón CRÉDITOS
+                _buildStyledButton(
+                  text: 'CRÉDITOS',
+                  onTap: () {
+                    print('Navegar a Créditos');
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// --- WIDGET AUXILIAR PARA LOS BOTONES CON EL ESTILO DE LA IMAGEN 2 ---
+  Widget _buildStyledButton({required String text, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        // **TAMAÑO DE LOS BOTONES REDUCIDO**
+        width: 200, // Ancho más pequeño
+        height: 45, // Alto más pequeño
+        decoration: BoxDecoration(
+          color: Colors.white, // Fondo blanco
+          borderRadius: BorderRadius.circular(8), // Bordes ligeramente redondeados
+          border: Border.all(color: Colors.grey.shade400, width: 2), // Borde gris claro
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3), // Sombra para dar profundidad
             ),
           ],
         ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Text(
+              text,
+              style: GoogleFonts.pressStart2p( // Fuente que ya usabas
+                color: const Color(0xFF2C3454), // Color de texto azul oscuro
+                fontSize: 14, // Tamaño de fuente más pequeño
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            // --- SIMULACIÓN DE LOS "REMACHES" ---
+            // Remache superior izquierdo
+            Positioned(
+              top: 5,
+              left: 5,
+              child: _buildRivets(),
+            ),
+            // Remache superior derecho
+            Positioned(
+              top: 5,
+              right: 5,
+              child: _buildRivets(),
+            ),
+            // Remache inferior izquierdo
+            Positioned(
+              bottom: 5,
+              left: 5,
+              child: _buildRivets(),
+            ),
+            // Remache inferior derecho
+            Positioned(
+              bottom: 5,
+              right: 5,
+              child: _buildRivets(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Widget para crear un "remache" individual
+  Widget _buildRivets() {
+    return Container(
+      width: 8, // Tamaño del remache
+      height: 8,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade600, // Color oscuro del remache
+        shape: BoxShape.circle, // Forma circular
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            offset: const Offset(0, 1),
+            blurRadius: 1,
+          ),
+        ],
       ),
     );
   }
