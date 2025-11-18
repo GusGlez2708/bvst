@@ -5,7 +5,8 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:bvst/game/audio_manager.dart';
 
-class Enemy extends SpriteComponent with HasGameReference<BattleGame>, CollisionCallbacks {
+class Enemy extends SpriteAnimationComponent
+    with HasGameReference<BattleGame>, CollisionCallbacks {
   int health = 15;
   late int maxHealth;
   double speed = 0.0;
@@ -18,20 +19,25 @@ class Enemy extends SpriteComponent with HasGameReference<BattleGame>, Collision
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    sprite = await Sprite.load('enemigo.png');
+    // Load static sprite as a 1-frame animation
+    final sprite = await Sprite.load('enemigo.png');
+    final spriteSize = sprite.srcSize;
+
+    animation = SpriteAnimation.spriteList([sprite], stepTime: 1.0);
+
     maxHealth = health;
 
     double newHeight = game.size.y * 0.18;
-    double newWidth = (sprite!.originalSize.x / sprite!.originalSize.y) * newHeight;
+    double newWidth = (spriteSize.x / spriteSize.y) * newHeight;
     size = Vector2(newWidth, newHeight);
 
     position = Vector2(game.size.x / 2, size.y / 2 + 50);
     add(RectangleHitbox());
 
-    _shootTimer = Timer(1.5, onTick: _shoot, repeat: true);
+    _shootTimer = Timer(1.5, onTick: shoot, repeat: true);
   }
 
-  void _shoot() {
+  void shoot() {
     if (!canShoot) return;
     AudioManager().playGameSfx('drop.mp3');
     final bullet = Bullet(
@@ -54,11 +60,8 @@ class Enemy extends SpriteComponent with HasGameReference<BattleGame>, Collision
     final paint = Paint();
     final healthPercentage = health / maxHealth;
 
-    // The canvas origin (0,0) is the top-left of the component's bounding box.
-    // The sprite is drawn centered within this box because of `anchor: Anchor.center`.
-    // We draw the health bar relative to the top-left origin.
     const barHeight = 10.0;
-    const barTop = -barHeight - 5; // 5 pixels above the component's bounding box
+    const barTop = -barHeight - 5;
 
     // Health bar background
     final backgroundRect = Rect.fromLTWH(0, barTop, size.x, barHeight);
@@ -66,8 +69,17 @@ class Enemy extends SpriteComponent with HasGameReference<BattleGame>, Collision
     canvas.drawRect(backgroundRect, paint);
 
     // Health bar foreground
-    final healthRect = Rect.fromLTWH(0, barTop, size.x * healthPercentage, barHeight);
-    final healthColor = Color.lerp(const Color(0xFFFF0000), const Color(0xFF00FF00), healthPercentage);
+    final healthRect = Rect.fromLTWH(
+      0,
+      barTop,
+      size.x * healthPercentage,
+      barHeight,
+    );
+    final healthColor = Color.lerp(
+      const Color(0xFFFF0000),
+      const Color(0xFF00FF00),
+      healthPercentage,
+    );
     paint.color = healthColor!;
     canvas.drawRect(healthRect, paint);
   }
@@ -82,12 +94,15 @@ class Enemy extends SpriteComponent with HasGameReference<BattleGame>, Collision
     if (position.x <= size.x / 2 || position.x >= game.size.x - size.x / 2) {
       direction *= -1;
     }
-    
+
     position.x = position.x.clamp(size.x / 2, game.size.x - size.x / 2);
   }
 
   @override
-  void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
+  void onCollisionStart(
+    Set<Vector2> intersectionPoints,
+    PositionComponent other,
+  ) {
     super.onCollisionStart(intersectionPoints, other);
     if (other is Bullet && other.isPlayerBullet) {
       AudioManager().playGameSfx('damage_ene.mp3');

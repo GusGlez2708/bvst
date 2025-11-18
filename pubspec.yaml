@@ -12,6 +12,10 @@ dependencies:
   flame: ^1.33.0
   google_fonts: ^6.2.0
   flame_audio: ^2.11.11
+# ... otras dependencias
+  supabase_flutter: ^2.0.0
+  # Usaremos esta para guardar la sesión del usuario localmente:
+  shared_preferences: ^2.0.0
 
 dev_dependencies:
   flutter_test:

@@ -9,10 +9,11 @@ class ResultScreen extends StatefulWidget {
   State<ResultScreen> createState() => _ResultScreenState();
 }
 
-class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderStateMixin {
+class _ResultScreenState extends State<ResultScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  bool _isButtonEnabled = false; 
+  bool _isButtonEnabled = false;
 
   @override
   void initState() {
@@ -21,17 +22,18 @@ class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderSt
       vsync: this,
       duration: const Duration(seconds: 1),
     );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_animationController)
-      ..addListener(() {
-        setState(() {});
-      })
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          setState(() {
-            _isButtonEnabled = true;
+    _fadeAnimation =
+        Tween<double>(begin: 0.0, end: 1.0).animate(_animationController)
+          ..addListener(() {
+            setState(() {});
+          })
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              setState(() {
+                _isButtonEnabled = true;
+              });
+            }
           });
-        }
-      });
 
     Future.delayed(const Duration(seconds: 1), () {
       _animationController.forward();
@@ -67,9 +69,10 @@ class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderSt
       primaryBorderColor = const Color(0xFFB94A48); // Borde rojo oscuro
     }
 
-    final String backgroundImage =
-        hasWon ? 'assets/images/you_win_bg.png' : 'assets/images/game_over_bg.png';
-    
+    final String backgroundImage = hasWon
+        ? 'assets/images/you_win_bg.png'
+        : 'assets/images/game_over_bg.png';
+
     final String buttonText = 'VOLVER AL MENÚ';
 
     return Scaffold(
@@ -77,31 +80,59 @@ class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderSt
         children: [
           // --- Fondo de pantalla ---
           Positioned.fill(
-            child: Image.asset(
-              backgroundImage,
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset(backgroundImage, fit: BoxFit.cover),
           ),
 
           // --- Botón posicionado ---
           Align(
             alignment: const Alignment(0.0, 0.65), // Posición (más arriba)
             // ¡Ya no usamos el widget Opacity aquí!
-            child: _buildStyledButton(
-              text: buttonText,
-              colors: (
-                button: primaryButtonColor,
-                text: primaryTextColor,
-                border: primaryBorderColor,
-              ),
-              // Pasamos el valor de la animación directamente al botón
-              opacity: _fadeAnimation.value,
-              onTap: _isButtonEnabled
-                  ? () {
-                      AudioManager().stopAllAudio();
-                      Navigator.pushNamedAndRemoveUntil(context, '/menu', (route) => false);
-                    }
-                  : null,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (hasWon)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20.0),
+                    child: _buildStyledButton(
+                      text: 'SIGUIENTE',
+                      colors: (
+                        button: const Color(0xFF4CAF50), // Verde
+                        text: Colors.white,
+                        border: const Color(0xFF81C784),
+                      ),
+                      opacity: _fadeAnimation.value,
+                      onTap: _isButtonEnabled
+                          ? () {
+                              AudioManager().stopAllAudio();
+                              Navigator.pushReplacementNamed(
+                                context,
+                                '/level_selection',
+                              );
+                            }
+                          : null,
+                    ),
+                  ),
+                _buildStyledButton(
+                  text: buttonText,
+                  colors: (
+                    button: primaryButtonColor,
+                    text: primaryTextColor,
+                    border: primaryBorderColor,
+                  ),
+                  // Pasamos el valor de la animación directamente al botón
+                  opacity: _fadeAnimation.value,
+                  onTap: _isButtonEnabled
+                      ? () {
+                          AudioManager().stopAllAudio();
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            '/menu',
+                            (route) => false,
+                          );
+                        }
+                      : null,
+                ),
+              ],
             ),
           ),
         ],
@@ -123,17 +154,23 @@ class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderSt
     final Color buttonColor = colors.button.withOpacity(opacity);
     final Color textColor = colors.text.withOpacity(opacity);
     final Color borderColor = colors.border.withOpacity(opacity);
-    final Color shadowColor = Colors.black.withOpacity(0.3 * opacity); // La sombra también se difumina
+    final Color shadowColor = Colors.black.withOpacity(
+      0.3 * opacity,
+    ); // La sombra también se difumina
 
     return GestureDetector(
-      onTap: onTap, // Sigue siendo nulo hasta que _isButtonEnabled es true, previniendo clics
+      onTap:
+          onTap, // Sigue siendo nulo hasta que _isButtonEnabled es true, previniendo clics
       child: Container(
         width: 280,
         height: 55,
         decoration: BoxDecoration(
           color: buttonColor, // Color de fondo (rojo/azul) con opacidad animada
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: borderColor, width: 2), // Borde con opacidad animada
+          border: Border.all(
+            color: borderColor,
+            width: 2,
+          ), // Borde con opacidad animada
           boxShadow: [
             BoxShadow(
               color: shadowColor, // Sombra con opacidad animada
@@ -157,8 +194,16 @@ class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderSt
             // Remaches (también reciben la opacidad)
             Positioned(top: 5, left: 5, child: _buildRivets(opacity: opacity)),
             Positioned(top: 5, right: 5, child: _buildRivets(opacity: opacity)),
-            Positioned(bottom: 5, left: 5, child: _buildRivets(opacity: opacity)),
-            Positioned(bottom: 5, right: 5, child: _buildRivets(opacity: opacity)),
+            Positioned(
+              bottom: 5,
+              left: 5,
+              child: _buildRivets(opacity: opacity),
+            ),
+            Positioned(
+              bottom: 5,
+              right: 5,
+              child: _buildRivets(opacity: opacity),
+            ),
           ],
         ),
       ),
@@ -171,11 +216,15 @@ class _ResultScreenState extends State<ResultScreen> with SingleTickerProviderSt
       width: 8,
       height: 8,
       decoration: BoxDecoration(
-        color: Colors.grey.shade600.withOpacity(opacity), // Color con opacidad animada
+        color: Colors.grey.shade600.withOpacity(
+          opacity,
+        ), // Color con opacidad animada
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4 * opacity), // Sombra con opacidad animada
+            color: Colors.black.withOpacity(
+              0.4 * opacity,
+            ), // Sombra con opacidad animada
             offset: const Offset(0, 1),
             blurRadius: 1,
           ),

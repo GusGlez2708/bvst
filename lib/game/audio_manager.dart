@@ -37,7 +37,7 @@ class AudioManager {
   set sfxEnabled(bool value) {
     _sfxMuted = !value;
   }
-  
+
   double get bgmVolume => _bgmVolume;
   set bgmVolume(double value) {
     _bgmVolume = value;
@@ -55,6 +55,9 @@ class AudioManager {
   late AudioPool damageEnePool;
   late AudioPool damageProtaPool;
 
+  late AudioPool fireUnderPool;
+  late AudioPool fuegoPool;
+
   bool _isMenuMusicPlaying = false;
   bool _isGameMusicPlaying = false;
 
@@ -62,10 +65,36 @@ class AudioManager {
   Future<void> preloadAllAudio() async {
     await FlameAudio.audioCache.clearAll();
 
-    laserPool = await FlameAudio.createPool('laser.mp3', minPlayers: 3, maxPlayers: 5);
-    dropPool = await FlameAudio.createPool('drop.mp3', minPlayers: 3, maxPlayers: 5);
-    damageEnePool = await FlameAudio.createPool('damage_ene.mp3', minPlayers: 2, maxPlayers: 3);
-    damageProtaPool = await FlameAudio.createPool('damage_prota.mp3', minPlayers: 2, maxPlayers: 3);
+    laserPool = await FlameAudio.createPool(
+      'laser.mp3',
+      minPlayers: 3,
+      maxPlayers: 5,
+    );
+    dropPool = await FlameAudio.createPool(
+      'drop.mp3',
+      minPlayers: 3,
+      maxPlayers: 5,
+    );
+    damageEnePool = await FlameAudio.createPool(
+      'damage_ene.mp3',
+      minPlayers: 2,
+      maxPlayers: 3,
+    );
+    damageProtaPool = await FlameAudio.createPool(
+      'damage_prota.mp3',
+      minPlayers: 2,
+      maxPlayers: 3,
+    );
+    fireUnderPool = await FlameAudio.createPool(
+      'FireUnder.mp3',
+      minPlayers: 3,
+      maxPlayers: 5,
+    );
+    fuegoPool = await FlameAudio.createPool(
+      'Fuego.mp3',
+      minPlayers: 3,
+      maxPlayers: 5,
+    );
 
     await FlameAudio.audioCache.loadAll([
       'start.mp3',
@@ -107,7 +136,7 @@ class AudioManager {
 
     // Now, handle the audio
     if (_bgmMuted) return;
-    
+
     FlameAudio.bgm.play('bg_music.mp3', volume: _bgmVolume);
   }
 
@@ -120,7 +149,7 @@ class AudioManager {
 
   /// 4. Reproductor de SFX del JUEGO (Usa POOLS)
   void playGameSfx(String filename) {
-    if (_sfxMuted || !_isGameMusicPlaying) return; 
+    if (_sfxMuted || !_isGameMusicPlaying) return;
 
     switch (filename) {
       case 'laser.mp3':
@@ -134,6 +163,12 @@ class AudioManager {
         break;
       case 'damage_prota.mp3':
         damageProtaPool.start(volume: _sfxVolume * 1.0);
+        break;
+      case 'FireUnder.mp3':
+        fireUnderPool.start(volume: _sfxVolume * 1.0);
+        break;
+      case 'Fuego.mp3':
+        fuegoPool.start(volume: _sfxVolume * 1.0);
         break;
     }
   }

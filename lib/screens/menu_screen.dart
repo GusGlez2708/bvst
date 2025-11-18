@@ -10,7 +10,6 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> {
-  
   @override
   void initState() {
     super.initState();
@@ -23,13 +22,12 @@ class _MenuScreenState extends State<MenuScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          
           // --- 1. FONDO DE PANTALLA ---
           // Tu imagen de fondo con el título y el cuadro verde.
           Positioned.fill(
             child: Image.asset(
               'assets/images/menu.png', // Asegúrate de que sea tu imagen correcta
-              fit: BoxFit.cover, 
+              fit: BoxFit.cover,
             ),
           ),
 
@@ -38,11 +36,14 @@ class _MenuScreenState extends State<MenuScreen> {
             // Ajusta este valor vertical para mover los botones arriba/abajo.
             // Empezamos con 0.3 (30% abajo del centro) como base.
             // Si el título aún se tapa, puedes probar 0.4 o 0.5.
-            alignment: const Alignment(0.0, 0.4), // Centrado H, un poco más abajo del centro V
+            alignment: const Alignment(
+              0.0,
+              0.4,
+            ), // Centrado H, un poco más abajo del centro V
             child: Column(
-              mainAxisSize: MainAxisSize.min, // La columna solo ocupa el espacio necesario
+              mainAxisSize: MainAxisSize
+                  .min, // La columna solo ocupa el espacio necesario
               children: [
-                
                 // Botón JUGAR
                 _buildStyledButton(
                   text: 'JUGAR',
@@ -52,7 +53,6 @@ class _MenuScreenState extends State<MenuScreen> {
                   },
                 ),
                 const SizedBox(height: 15), // Espacio entre botones (reducido)
-
                 // Botón TIENDA
                 _buildStyledButton(
                   text: 'TIENDA',
@@ -87,7 +87,10 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   /// --- WIDGET AUXILIAR PARA LOS BOTONES CON EL ESTILO DE LA IMAGEN 2 ---
-  Widget _buildStyledButton({required String text, required VoidCallback onTap}) {
+  Widget _buildStyledButton({
+    required String text,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -96,8 +99,13 @@ class _MenuScreenState extends State<MenuScreen> {
         height: 45, // Alto más pequeño
         decoration: BoxDecoration(
           color: Colors.white, // Fondo blanco
-          borderRadius: BorderRadius.circular(8), // Bordes ligeramente redondeados
-          border: Border.all(color: Colors.grey.shade400, width: 2), // Borde gris claro
+          borderRadius: BorderRadius.circular(
+            8,
+          ), // Bordes ligeramente redondeados
+          border: Border.all(
+            color: Colors.grey.shade400,
+            width: 2,
+          ), // Borde gris claro
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.3),
@@ -112,7 +120,8 @@ class _MenuScreenState extends State<MenuScreen> {
           children: [
             Text(
               text,
-              style: GoogleFonts.pressStart2p( // Fuente que ya usabas
+              style: GoogleFonts.pressStart2p(
+                // Fuente que ya usabas
                 color: const Color(0xFF2C3454), // Color de texto azul oscuro
                 fontSize: 14, // Tamaño de fuente más pequeño
                 fontWeight: FontWeight.bold,
@@ -120,29 +129,13 @@ class _MenuScreenState extends State<MenuScreen> {
             ),
             // --- SIMULACIÓN DE LOS "REMACHES" ---
             // Remache superior izquierdo
-            Positioned(
-              top: 5,
-              left: 5,
-              child: _buildRivets(),
-            ),
+            Positioned(top: 5, left: 5, child: _buildRivets()),
             // Remache superior derecho
-            Positioned(
-              top: 5,
-              right: 5,
-              child: _buildRivets(),
-            ),
+            Positioned(top: 5, right: 5, child: _buildRivets()),
             // Remache inferior izquierdo
-            Positioned(
-              bottom: 5,
-              left: 5,
-              child: _buildRivets(),
-            ),
+            Positioned(bottom: 5, left: 5, child: _buildRivets()),
             // Remache inferior derecho
-            Positioned(
-              bottom: 5,
-              right: 5,
-              child: _buildRivets(),
-            ),
+            Positioned(bottom: 5, right: 5, child: _buildRivets()),
           ],
         ),
       ),
