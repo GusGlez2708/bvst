@@ -12,7 +12,7 @@ class LevelSelectionScreen extends StatelessWidget {
         children: [
           // Background Image (Map 2)
           Positioned.fill(
-            child: Image.asset('assets/images/Map_Lvl2.png', fit: BoxFit.cover),
+            child: Image.asset('assets/images/Map_Lvl2.png', fit: BoxFit.fill, filterQuality: FilterQuality.high),
           ),
 
           // Overlay for better text visibility

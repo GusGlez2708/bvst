@@ -17,7 +17,8 @@ class MapScreen extends StatelessWidget {
           Positioned.fill(
             child: Image.asset(
               'assets/images/Mapa_Lvl2.png',
-              fit: BoxFit.cover,
+              fit: BoxFit.fill,
+              filterQuality: FilterQuality.high,
             ),
           ),
 

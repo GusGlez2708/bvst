@@ -166,7 +166,8 @@ class _GameScreenState extends State<GameScreen> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage('assets/images/fondo.png'),
-                      fit: BoxFit.cover,
+                      fit: BoxFit.fill,
+                      filterQuality: FilterQuality.high,
                     ),
                   ),
                 );

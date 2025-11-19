@@ -80,7 +80,7 @@ class _ResultScreenState extends State<ResultScreen>
         children: [
           // --- Fondo de pantalla ---
           Positioned.fill(
-            child: Image.asset(backgroundImage, fit: BoxFit.cover),
+            child: Image.asset(backgroundImage, fit: BoxFit.fill, filterQuality: FilterQuality.high),
           ),
 
           // --- Botón posicionado ---

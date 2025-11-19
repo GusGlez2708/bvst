@@ -27,7 +27,8 @@ class _MenuScreenState extends State<MenuScreen> {
           Positioned.fill(
             child: Image.asset(
               'assets/images/menu.png', // Asegúrate de que sea tu imagen correcta
-              fit: BoxFit.cover,
+              fit: BoxFit.fill,
+              filterQuality: FilterQuality.high,
             ),
           ),
 

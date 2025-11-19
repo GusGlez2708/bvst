@@ -150,7 +150,8 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> {
                       image: AssetImage(
                         'assets/images/fondo_Ira.png',
                       ), // Level 2 Background
-                      fit: BoxFit.cover,
+                      fit: BoxFit.fill,
+                      filterQuality: FilterQuality.high,
                     ),
                   ),
                 );
