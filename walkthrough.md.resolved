@@ -1,0 +1,144 @@
+# Visual Enhancements Walkthrough
+
+This walkthrough documents the visual enhancements made to the game, including increased floor fire sprite size, collision particle effects, and a full-width enemy health bar.
+
+## Changes Made
+
+### 1. Increased Floor Fire Sprite Size
+
+**File Modified:** [floor_fire.dart](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/floor_fire.dart#L37-L39)
+
+The floor fire sprite size was increased from 15% to 25% of the screen height for better visibility:
+
+```diff
+-    // Size it appropriately
+-    double newHeight = game.size.y * 0.15;
++    // Size it appropriately - increased from 0.15 to 0.25 for better visibility
++    double newHeight = game.size.y * 0.25;
+     double newWidth = (spriteSize.x / spriteSize.y) * newHeight;
+     size = Vector2(newWidth, newHeight);
+```
+
+**Impact:** The floor fire hazards in Level 2 are now 66% larger and much easier to see.
+
+---
+
+### 2. Collision Particle Effects
+
+**New File Created:** [collision_particle.dart](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/collision_particle.dart)
+
+Created a new particle system that spawns animated particles when collisions occur:
+
+- **Particle Behavior:** 8 particles per collision that spread out in all directions
+- **Animation:** Particles fade out over 0.5 seconds with gravity and deceleration effects
+- **Configurable:** Color, lifetime, and particle count can be customized
+
+**Integration:**
+
+#### Enemy Collision Particles (Orange)
+**File Modified:** [enemy.dart](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/enemy.dart#L109-L117)
+
+When a player bullet hits an enemy, orange particles spawn:
+
+```dart
+// Spawn collision particles
+final particle = CollisionParticle(
+  position: position.clone(),
+  color: const Color(0xFFFF6600), // Orange particles for enemy damage
+);
+game.add(particle);
+```
+
+#### Player Collision Particles (Green)
+**File Modified:** [player.dart](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/player.dart#L111-L119)
+
+When an enemy bullet hits the player, green particles spawn:
+
+```dart
+// Spawn collision particles for player damage
+final particle = CollisionParticle(
+  position: position.clone(),
+  color: const Color(0xFF00FF00), // Green particles for player damage
+);
+game.add(particle);
+```
+
+**Impact:** Collisions now have clear visual feedback with color-coded particles:
+- 🟠 **Orange** = Enemy taking damage
+- 🟢 **Green** = Player taking damage
+
+---
+
+### 3. Full-Width Enemy Health Bar
+
+**File Modified:** [enemy.dart](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/enemy.dart#L57-L58)
+
+Removed the small health bar that appeared above the enemy sprite.
+
+**File Modified:** [battle_game.dart](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/battle_game.dart#L35-L97)
+
+Added a new full-width health bar at the top of the screen with:
+
+- ⬛ **Dark gray background** across the full width (with padding)
+- 🟥➡️🟩 **Color gradient** from red (low health) to green (full health)  
+- ⬜ **White border** around the health bar
+- 📊 **Health text** displaying "current / max" health centered in the bar
+
+```dart
+// Render enemy health bar at top of screen (full width)
+const barHeight = 30.0;
+const barTop = 20.0;
+const sidePadding = 20.0;
+final barWidth = size.x - (sidePadding * 2);
+
+// Health bar background (dark gray)
+final backgroundRect = Rect.fromLTWH(sidePadding, barTop, barWidth, barHeight);
+paint.color = const Color(0xFF333333);
+canvas.drawRect(backgroundRect, paint);
+
+// Health bar foreground (gradient from red to green)
+final healthRect = Rect.fromLTWH(
+  sidePadding,
+  barTop,
+  barWidth * healthPercentage,
+  barHeight,
+);
+final healthColor = Color.lerp(
+  const Color(0xFFFF0000), // Red
+  const Color(0xFF00FF00), // Green
+  healthPercentage,
+);
+paint.color = healthColor!;
+canvas.drawRect(healthRect, paint);
+
+// Border and health text...
+```
+
+**Impact:** Enemy health is now clearly visible at all times at the top of the screen, making it much easier to track battle progress.
+
+---
+
+## Summary
+
+All three enhancements have been successfully implemented:
+
+✅ **Floor fire sprites** are now 66% larger (25% vs 15% of screen height)  
+✅ **Collision particles** provide instant visual feedback with color-coded effects  
+✅ **Enemy health bar** spans the full width of the screen at the top with health percentage display  
+
+These changes apply to both Level 1 and Level 2 battles, as [BattleGameLevel2](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/battle_game_lvl2.dart#7-56) inherits from [BattleGame](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/battle_game.dart#7-54).
+
+## Testing
+
+To test these changes, run the game and:
+
+1. Navigate to Level 1 or Level 2 battle
+2. Observe the **larger floor fire sprites** in Level 2
+3. Shoot the enemy and watch for **orange particle effects**
+4. Get hit by enemy bullets and watch for **green particle effects**
+5. Check the **full-width health bar** at the top of the screen as you damage the enemy
+
+```bash
+cd c:\Users\bryal\Android\juego\LastCommit\bvst
+flutter run
+```

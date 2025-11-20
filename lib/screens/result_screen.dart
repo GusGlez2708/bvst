@@ -80,7 +80,11 @@ class _ResultScreenState extends State<ResultScreen>
         children: [
           // --- Fondo de pantalla ---
           Positioned.fill(
-            child: Image.asset(backgroundImage, fit: BoxFit.fill, filterQuality: FilterQuality.high),
+            child: Image.asset(
+              backgroundImage,
+              fit: BoxFit.fill,
+              filterQuality: FilterQuality.high,
+            ),
           ),
 
           // --- Botón posicionado ---
@@ -108,6 +112,24 @@ class _ResultScreenState extends State<ResultScreen>
                                 context,
                                 '/level_selection',
                               );
+                            }
+                          : null,
+                    ),
+                  ),
+                if (hasWon)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20.0),
+                    child: _buildStyledButton(
+                      text: 'TIENDA',
+                      colors: (
+                        button: const Color(0xFFFFA500), // Orange
+                        text: Colors.white,
+                        border: const Color(0xFFFFB84D),
+                      ),
+                      opacity: _fadeAnimation.value,
+                      onTap: _isButtonEnabled
+                          ? () {
+                              Navigator.pushNamed(context, '/shop');
                             }
                           : null,
                     ),

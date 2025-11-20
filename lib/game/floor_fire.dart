@@ -34,8 +34,8 @@ class FloorFire extends SpriteAnimationComponent
     // Play sound
     AudioManager().playGameSfx('Fuego.mp3');
 
-    // Size it appropriately
-    double newHeight = game.size.y * 0.15;
+    // Size it appropriately - increased from 0.15 to 0.25 for better visibility
+    double newHeight = game.size.y * 0.25;
     double newWidth = (spriteSize.x / spriteSize.y) * newHeight;
     size = Vector2(newWidth, newHeight);
 

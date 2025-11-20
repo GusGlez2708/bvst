@@ -58,7 +58,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 _buildStyledButton(
                   text: 'TIENDA',
                   onTap: () {
-                    print('Navegar a Tienda');
+                    Navigator.pushNamed(context, '/shop');
                   },
                 ),
                 const SizedBox(height: 15),

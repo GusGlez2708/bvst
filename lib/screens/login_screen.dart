@@ -2,6 +2,7 @@
 import 'package:bvst/game/audio_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,26 +14,90 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
-  // En una aplicación real, aquí iría la lógica de autenticación.
-  // Por ahora, solo simularemos un acceso exitoso.
-  void _authenticate() {
-    // Simulamos un acceso exitoso después de un pequeño retraso
-    // Solo si ambos campos tienen contenido (mínima validación)
-    if (_usernameController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
-      AudioManager().playUiSfx(
-        'start.mp3',
-      ); // Usamos el sonido de inicio para el login
+  Future<void> _handleAuth() async {
+    if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
+      _showError('Por favor, ingresa Usuario/Email y Contraseña.');
+      return;
+    }
 
-      // Navegación exitosa al menú principal
-      Navigator.pushReplacementNamed(context, '/menu');
-    } else {
-      // Muestra una alerta simple de error
+    setState(() => _isLoading = true);
+
+    try {
+      final supabase = Supabase.instance.client;
+
+      // Detect if user entered an email or username
+      final input = _usernameController.text.toLowerCase().trim();
+      final email = input.contains('@')
+          ? input // Use email directly if contains @
+          : '$input@player.game'; // Otherwise add domain
+
+      final password = _passwordController.text;
+
+      // Extract username from email
+      final username = input.contains('@') ? input.split('@')[0] : input;
+
+      // Try to sign in first
+      try {
+        final signInResponse = await supabase.auth.signInWithPassword(
+          email: email,
+          password: password,
+        );
+
+        if (signInResponse.user != null) {
+          _onAuthSuccess();
+        }
+      } on AuthException catch (authError) {
+        // If sign in fails, try to sign up
+        if (authError.message.contains('Invalid login credentials') ||
+            authError.message.contains('Email not confirmed')) {
+          await _signUp(email, password, username);
+        } else {
+          throw authError;
+        }
+      }
+    } catch (e) {
+      _showError('Error de autenticación: ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _signUp(String email, String password, String username) async {
+    try {
+      final supabase = Supabase.instance.client;
+
+      // Sign up new user - trigger will auto-create users table entry
+      final signUpResponse = await supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {'username': username},
+      );
+
+      if (signUpResponse.user != null) {
+        print('User registered: $username');
+        _onAuthSuccess();
+      }
+    } catch (e) {
+      throw Exception('Error en registro: ${e.toString()}');
+    }
+  }
+
+  void _onAuthSuccess() {
+    AudioManager().playUiSfx('start.mp3');
+    Navigator.pushReplacementNamed(context, '/menu');
+  }
+
+  void _showError(String message) {
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, ingresa Usuario y Contraseña.'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.red.shade700,
         ),
       );
     }
@@ -40,7 +105,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Usa un fondo oscuro consistente
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -54,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: Center(
           child: Container(
-            width: 350, // Ancho fijo para el formulario
+            width: 350,
             padding: const EdgeInsets.all(24.0),
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.7),
@@ -77,10 +141,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 30),
 
-                // Campo de Usuario
+                // Campo de Usuario/Email
                 _buildTextField(
                   controller: _usernameController,
-                  labelText: 'USUARIO',
+                  labelText: 'USUARIO o EMAIL',
                   icon: Icons.person_outline,
                 ),
                 const SizedBox(height: 20),
@@ -95,10 +159,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 40),
 
                 // Botón de Login/Registro
-                _buildStyledButton(
-                  text: 'ACCEDER / REGISTRAR',
-                  onTap: _authenticate,
-                ),
+                _isLoading
+                    ? const CircularProgressIndicator(color: Color(0xFF61E2FF))
+                    : _buildStyledButton(
+                        text: 'ACCEDER / REGISTRAR',
+                        onTap: _handleAuth,
+                      ),
               ],
             ),
           ),
@@ -107,7 +173,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Widget auxiliar para campos de texto estilizados
   Widget _buildTextField({
     required TextEditingController controller,
     required String labelText,
@@ -143,7 +208,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Widget auxiliar para el botón de estilo retro
   Widget _buildStyledButton({
     required String text,
     required VoidCallback onTap,

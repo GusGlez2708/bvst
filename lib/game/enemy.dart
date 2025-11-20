@@ -4,6 +4,8 @@ import 'package:bvst/game/bullet.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:bvst/game/audio_manager.dart';
+import 'package:bvst/game/collision_particle.dart';
+import 'package:bvst/game/game_state.dart';
 
 class Enemy extends SpriteAnimationComponent
     with HasGameReference<BattleGame>, CollisionCallbacks {
@@ -13,6 +15,7 @@ class Enemy extends SpriteAnimationComponent
   int direction = 1;
   late Timer _shootTimer;
   bool canShoot = false;
+  bool _isEnraged = false; // Enrage flag
 
   Enemy() : super(anchor: Anchor.center);
 
@@ -53,41 +56,17 @@ class Enemy extends SpriteAnimationComponent
     _shootTimer.start();
   }
 
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-
-    final paint = Paint();
-    final healthPercentage = health / maxHealth;
-
-    const barHeight = 10.0;
-    const barTop = -barHeight - 5;
-
-    // Health bar background
-    final backgroundRect = Rect.fromLTWH(0, barTop, size.x, barHeight);
-    paint.color = const Color(0xFF000000);
-    canvas.drawRect(backgroundRect, paint);
-
-    // Health bar foreground
-    final healthRect = Rect.fromLTWH(
-      0,
-      barTop,
-      size.x * healthPercentage,
-      barHeight,
-    );
-    final healthColor = Color.lerp(
-      const Color(0xFFFF0000),
-      const Color(0xFF00FF00),
-      healthPercentage,
-    );
-    paint.color = healthColor!;
-    canvas.drawRect(healthRect, paint);
-  }
+  // Health bar rendering moved to BattleGame class to display full-width at top of screen
 
   @override
   void update(double dt) {
     super.update(dt);
     _shootTimer.update(dt);
+
+    // Check for enrage at 50% health
+    if (!_isEnraged && health <= maxHealth / 2 && health > 0) {
+      _triggerEnrage();
+    }
 
     position.x += speed * direction * dt;
 
@@ -96,6 +75,20 @@ class Enemy extends SpriteAnimationComponent
     }
 
     position.x = position.x.clamp(size.x / 2, game.size.x - size.x / 2);
+  }
+
+  void _triggerEnrage() {
+    _isEnraged = true;
+
+    // Double speed
+    speed = speed * 2;
+
+    // Double fire rate by halving timer interval
+    _shootTimer.stop();
+    _shootTimer = Timer(0.75, onTick: shoot, repeat: true); // 1.5s -> 0.75s
+    _shootTimer.start();
+
+    print('🔥 BOSS ENRAGED! Speed and fire rate DOUBLED! 🔥');
   }
 
   @override
@@ -108,6 +101,21 @@ class Enemy extends SpriteAnimationComponent
       AudioManager().playGameSfx('damage_ene.mp3');
       health--;
       other.removeFromParent();
+
+      // Spawn collision particles
+      final particle = CollisionParticle(
+        position: position.clone(),
+        color: const Color(0xFFFF6600), // Orange particles for enemy damage
+      );
+      game.add(particle);
+
+      // Award coins if enemy is defeated
+      if (health <= 0) {
+        final gameState = GameState();
+        gameState.addCoins(GameState.coinsPerEnemyKill);
+        print('Enemy defeated! Awarded ${GameState.coinsPerEnemyKill} coins');
+      }
+
       game.checkWinCondition();
     }
   }

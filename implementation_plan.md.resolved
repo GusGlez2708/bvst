@@ -1,0 +1,74 @@
+# Enhance Visual Effects and UI
+
+Improve game visual feedback and clarity by making the floor fire sprite larger, adding collision particle effects, and making the enemy health bar span the full width of the screen.
+
+## User Review Required
+
+> [!IMPORTANT]
+> The enemy health bar will change from being positioned above the enemy sprite to being a full-width bar at the top of the screen. This is a significant visual change that affects both Level 1 and Level 2.
+
+## Proposed Changes
+
+### Game Components
+
+#### [MODIFY] [floor_fire.dart](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/floor_fire.dart)
+- Increase sprite size from 15% to 25% of screen height for better visibility
+- Modify line 37 to use larger height value
+
+#### [NEW] [collision_particle.dart](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/collision_particle.dart)
+- Create new particle component for collision effects
+- Particle will appear when bullets hit enemies or player
+- Animated sprite-based particles with short lifetime
+- Configure color, size, and animation based on collision type
+
+#### [MODIFY] [bullet.dart](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/bullet.dart)
+- Import and spawn collision particles when bullet is removed due to collision
+- Note: Actual collision detection happens in `Enemy.onCollisionStart()`, so we'll emit particles there
+
+#### [MODIFY] [enemy.dart](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/enemy.dart)
+- Remove health bar rendering from [render()](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/battle_game.dart#31-41) method (lines 57-85)
+- Spawn collision particles in [onCollisionStart()](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/floor_fire.dart#55-65) when hit by player bullet
+- Health bar will be rendered in the game class instead
+
+---
+
+### Game Logic
+
+#### [MODIFY] [battle_game.dart](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/battle_game.dart)
+- Add health bar rendering in [render()](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/battle_game.dart#31-41) method to display enemy health as full-width bar at top of screen
+- Position health bar at the top with proper padding
+- Include health percentage text display
+
+#### [MODIFY] [battle_game_lvl2.dart](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/battle_game_lvl2.dart)
+- Inherits health bar rendering from parent [BattleGame](file:///c:/Users/bryal/Android/juego/LastCommit/bvst/lib/game/battle_game.dart#7-54) class, no changes needed unless we need Level 2 specific styling
+
+## Verification Plan
+
+### Manual Verification
+
+Since this is a visual game built with Flutter and Flame, verification will be manual by running the game:
+
+1. **Floor Fire Size Verification**
+   - Run Level 2 game and observe floor fire sprites
+   - Confirm they are noticeably larger than before
+   - Ensure they don't overlap with other UI elements
+
+2. **Collision Particles Verification**
+   - Run both Level 1 and Level 2
+   - Shoot enemy with player bullets and verify particles appear
+   - Get hit by enemy bullets and verify player collision particles appear
+   - Confirm particles are visually appealing and don't persist too long
+
+3. **Enemy Health Bar Verification**
+   - Run both Level 1 and Level 2
+   - Verify health bar appears at the top of the screen spanning full width
+   - Damage the enemy and confirm the bar updates reactively
+   - Verify the color changes from green to red as health decreases
+
+**Commands to run:**
+```bash
+cd c:\Users\bryal\Android\juego\LastCommit\bvst
+flutter run
+```
+
+Then navigate through the game menus to test both Level 1 and Level 2 battles.

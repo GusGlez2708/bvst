@@ -11,6 +11,7 @@ import 'package:bvst/screens/options_screen.dart';
 import 'package:bvst/screens/login_screen.dart'; // <-- NUEVO
 import 'package:bvst/screens/level_selection_screen.dart';
 import 'package:bvst/screens/game_screen_lvl2.dart';
+import 'package:bvst/screens/shop_screen.dart'; // <-- NUEVO
 import 'package:supabase_flutter/supabase_flutter.dart'; // <-- NUEVO
 
 void main() async {
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(), // <-- NUEVA RUTA
         '/menu': (context) => const MenuScreen(),
+        '/shop': (context) => const ShopScreen(), // <-- NUEVA RUTA TIENDA
         '/game': (context) => const GameScreen(),
         '/result': (context) => const ResultScreen(),
         '/options': (context) => const OptionsScreen(),
