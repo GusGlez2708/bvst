@@ -13,6 +13,7 @@ import 'package:bvst/screens/level_selection_screen.dart';
 import 'package:bvst/screens/game_screen_lvl2.dart';
 import 'package:bvst/screens/shop_screen.dart'; // <-- NUEVO
 import 'package:supabase_flutter/supabase_flutter.dart'; // <-- NUEVO
+import 'package:bvst/services/ad_service.dart'; // <-- NUEVO
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +27,7 @@ void main() async {
   // ------------------------
 
   await AudioManager().preloadAllAudio();
+  await AdService().initialize(); // <-- NUEVO
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,

@@ -1,4 +1,5 @@
 import 'package:bvst/game/audio_manager.dart';
+import 'package:bvst/services/ad_service.dart'; // <-- NUEVO
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -37,6 +38,7 @@ class _ResultScreenState extends State<ResultScreen>
 
     Future.delayed(const Duration(seconds: 1), () {
       _animationController.forward();
+      AdService().showInterstitial(); // <-- NUEVO
     });
   }
 

@@ -5,6 +5,8 @@ import 'package:bvst/game/battle_game.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:bvst/services/ad_service.dart'; // <-- NUEVO
+import 'package:google_mobile_ads/google_mobile_ads.dart'; // <-- NUEVO
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -43,6 +45,7 @@ class _GameScreenState extends State<GameScreen> {
       },
     );
     _startCountdown();
+    AdService().loadBanner(); // <-- Cargar banner
   }
 
   void _startCountdown() {
@@ -151,6 +154,13 @@ class _GameScreenState extends State<GameScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       resizeToAvoidBottomInset: false,
+      bottomNavigationBar: AdService().getBannerAd() != null 
+          ? SizedBox(
+              height: AdService().getBannerAd()!.size.height.toDouble(),
+              width: AdService().getBannerAd()!.size.width.toDouble(),
+              child: AdWidget(ad: AdService().getBannerAd()!),
+            )
+          : null,
       body: SafeArea(
         top: false,
         bottom: false,

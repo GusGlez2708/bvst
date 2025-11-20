@@ -16,6 +16,7 @@ dependencies:
   supabase_flutter: ^2.0.0
   # Usaremos esta para guardar la sesión del usuario localmente:
   shared_preferences: ^2.0.0
+  google_mobile_ads: ^5.0.0
 
 dev_dependencies:
   flutter_test:
