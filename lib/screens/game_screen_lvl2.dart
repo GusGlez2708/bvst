@@ -25,6 +25,7 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> {
       onGameOver: (hasWon) {
         if (mounted) {
           _game.pauseEngine();
+          AudioManager().stopAllPooledSfx(); // Detiene los SFX de los pools
           AudioManager().stopGameBgm();
 
           if (hasWon) {

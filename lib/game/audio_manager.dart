@@ -16,6 +16,11 @@ class AudioManager {
   double _bgmVolume = 0.5;
   double _sfxVolume = 1.0;
 
+  // --- State ---
+  bool _isMenuMusicPlaying = false;
+  bool _isGameMusicPlaying = false;
+  final List<void Function()> _activeSfxStopFunctions = [];
+
   // --- Public accessors for settings ---
   bool get bgmEnabled => !_bgmMuted;
   set bgmEnabled(bool value) {
@@ -23,8 +28,6 @@ class AudioManager {
     if (_bgmMuted) {
       FlameAudio.bgm.stop();
     } else {
-      // If BGM was just re-enabled, check which track should be playing
-      // based on our flags, and restart it.
       if (_isMenuMusicPlaying) {
         playMenuBgm();
       } else if (_isGameMusicPlaying) {
@@ -36,6 +39,9 @@ class AudioManager {
   bool get sfxEnabled => !_sfxMuted;
   set sfxEnabled(bool value) {
     _sfxMuted = !value;
+    if (_sfxMuted) {
+      stopAllPooledSfx();
+    }
   }
 
   double get bgmVolume => _bgmVolume;
@@ -54,47 +60,17 @@ class AudioManager {
   late AudioPool dropPool;
   late AudioPool damageEnePool;
   late AudioPool damageProtaPool;
-
-  late AudioPool fireUnderPool;
   late AudioPool fuegoPool;
-
-  bool _isMenuMusicPlaying = false;
-  bool _isGameMusicPlaying = false;
 
   /// 1. Pre-carga TODO el audio.
   Future<void> preloadAllAudio() async {
     await FlameAudio.audioCache.clearAll();
 
-    laserPool = await FlameAudio.createPool(
-      'laser.mp3',
-      minPlayers: 3,
-      maxPlayers: 5,
-    );
-    dropPool = await FlameAudio.createPool(
-      'drop.mp3',
-      minPlayers: 3,
-      maxPlayers: 5,
-    );
-    damageEnePool = await FlameAudio.createPool(
-      'damage_ene.mp3',
-      minPlayers: 2,
-      maxPlayers: 3,
-    );
-    damageProtaPool = await FlameAudio.createPool(
-      'damage_prota.mp3',
-      minPlayers: 2,
-      maxPlayers: 3,
-    );
-    fireUnderPool = await FlameAudio.createPool(
-      'FireUnder.mp3',
-      minPlayers: 3,
-      maxPlayers: 5,
-    );
-    fuegoPool = await FlameAudio.createPool(
-      'Fuego.mp3',
-      minPlayers: 3,
-      maxPlayers: 5,
-    );
+    laserPool = await FlameAudio.createPool('laser.mp3', maxPlayers: 5);
+    dropPool = await FlameAudio.createPool('drop.mp3', maxPlayers: 5);
+    damageEnePool = await FlameAudio.createPool('damage_ene.mp3', maxPlayers: 3);
+    damageProtaPool = await FlameAudio.createPool('damage_prota.mp3', maxPlayers: 3);
+    fuegoPool = await FlameAudio.createPool('Fuego.mp3', maxPlayers: 5);
 
     await FlameAudio.audioCache.loadAll([
       'start.mp3',
@@ -102,21 +78,18 @@ class AudioManager {
       'menu_music.mp3',
       'victory.mp3',
       'defeat.mp3',
+      'FireUnder.mp3', // Not used in a pool, but good to cache
     ]);
   }
 
   /// 2. Control de Música del Menú
   void playMenuBgm() {
     stopAllAudio();
-
-    // Set the state for the menu screen
     _isMenuMusicPlaying = true;
     _isGameMusicPlaying = false;
-
-    // Now, handle the audio
-    if (_bgmMuted) return;
-
-    FlameAudio.bgm.play('menu_music.mp3', volume: _bgmVolume);
+    if (!_bgmMuted) {
+      FlameAudio.bgm.play('menu_music.mp3', volume: _bgmVolume);
+    }
   }
 
   void stopMenuBgm() {
@@ -129,15 +102,11 @@ class AudioManager {
   /// 3. Control de Música del Juego
   void playGameBgm() {
     stopAllAudio();
-
-    // Set the state for the game screen
     _isGameMusicPlaying = true;
     _isMenuMusicPlaying = false;
-
-    // Now, handle the audio
-    if (_bgmMuted) return;
-
-    FlameAudio.bgm.play('bg_music.mp3', volume: _bgmVolume);
+    if (!_bgmMuted) {
+      FlameAudio.bgm.play('bg_music.mp3', volume: _bgmVolume);
+    }
   }
 
   void stopGameBgm() {
@@ -147,7 +116,7 @@ class AudioManager {
     }
   }
 
-  /// 4. Reproductor de SFX del JUEGO (Usa POOLS)
+  /// 4. Reproductor de SFX del JUEGO
   void playGameSfx(String filename) {
     if (_sfxMuted || !_isGameMusicPlaying) return;
 
@@ -164,11 +133,10 @@ class AudioManager {
       case 'damage_prota.mp3':
         damageProtaPool.start(volume: _sfxVolume * 1.0);
         break;
-      case 'FireUnder.mp3':
-        fireUnderPool.start(volume: _sfxVolume * 1.0);
-        break;
       case 'Fuego.mp3':
-        fuegoPool.start(volume: _sfxVolume * 1.0);
+        fuegoPool.start(volume: _sfxVolume * 0.7).then((stopper) {
+          _activeSfxStopFunctions.add(stopper);
+        });
         break;
     }
   }
@@ -180,10 +148,19 @@ class AudioManager {
     _uiSfxPlayer.play(AssetSource('audio/$filename'), volume: _sfxVolume);
   }
 
-  /// 6. Detiene BGM y SFX de UI.
+  /// 6. Detiene todos los SFX de los pools que estamos rastreando.
+  void stopAllPooledSfx() {
+    for (final stopFunction in _activeSfxStopFunctions) {
+      stopFunction();
+    }
+    _activeSfxStopFunctions.clear();
+  }
+
+  /// 7. Detiene TODA la reproducción de audio.
   void stopAllAudio() {
     FlameAudio.bgm.stop();
     _uiSfxPlayer.stop();
+    stopAllPooledSfx(); // Llama a nuestro nuevo método
 
     _isMenuMusicPlaying = false;
     _isGameMusicPlaying = false;

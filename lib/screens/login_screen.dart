@@ -116,56 +116,58 @@ class _LoginScreenState extends State<LoginScreen> {
             radius: 0.8,
           ),
         ),
-        child: Center(
-          child: Container(
-            width: 350,
-            padding: const EdgeInsets.all(24.0),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFF61E2FF).withOpacity(0.5),
-                width: 1,
+        child: SingleChildScrollView(
+          child: Center(
+            child: Container(
+              width: 350,
+              padding: const EdgeInsets.all(24.0),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFF61E2FF).withOpacity(0.5),
+                  width: 1,
+                ),
               ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'ACCESO DE COMBATE',
-                  style: GoogleFonts.orbitron(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF61E2FF),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'ACCESO DE COMBATE',
+                    style: GoogleFonts.orbitron(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF61E2FF),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 30),
+                  const SizedBox(height: 30),
 
-                // Campo de Usuario/Email
-                _buildTextField(
-                  controller: _usernameController,
-                  labelText: 'USUARIO o EMAIL',
-                  icon: Icons.person_outline,
-                ),
-                const SizedBox(height: 20),
+                  // Campo de Usuario/Email
+                  _buildTextField(
+                    controller: _usernameController,
+                    labelText: 'USUARIO o EMAIL',
+                    icon: Icons.person_outline,
+                  ),
+                  const SizedBox(height: 20),
 
-                // Campo de Contraseña
-                _buildTextField(
-                  controller: _passwordController,
-                  labelText: 'CONTRASEÑA',
-                  icon: Icons.lock_outline,
-                  isPassword: true,
-                ),
-                const SizedBox(height: 40),
+                  // Campo de Contraseña
+                  _buildTextField(
+                    controller: _passwordController,
+                    labelText: 'CONTRASEÑA',
+                    icon: Icons.lock_outline,
+                    isPassword: true,
+                  ),
+                  const SizedBox(height: 40),
 
-                // Botón de Login/Registro
-                _isLoading
-                    ? const CircularProgressIndicator(color: Color(0xFF61E2FF))
-                    : _buildStyledButton(
-                        text: 'ACCEDER / REGISTRAR',
-                        onTap: _handleAuth,
-                      ),
-              ],
+                  // Botón de Login/Registro
+                  _isLoading
+                      ? const CircularProgressIndicator(color: Color(0xFF61E2FF))
+                      : _buildStyledButton(
+                          text: 'ACCEDER / REGISTRAR',
+                          onTap: _handleAuth,
+                        ),
+                ],
+              ),
             ),
           ),
         ),
