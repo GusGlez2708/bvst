@@ -38,7 +38,24 @@ class _ResultScreenState extends State<ResultScreen>
 
     Future.delayed(const Duration(seconds: 1), () {
       _animationController.forward();
-      AdService().showInterstitial(); // <-- NUEVO
+      // Check if we should show ad (not on level 1 win)
+      final Map<String, dynamic> args =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      final int currentLevel = args['currentLevel'] ?? 1;
+      
+      // Show ad only if NOT level 1 (or if you want to show it on game over regardless of level, adjust logic)
+      // User request: "solo quiero que cambies el del nivel 1, quiero que lo quites"
+      // Assuming this means remove it from Level 1 completion/gameover? 
+      // "el que aparece cuando se muere el jugador esta bien, ahora, solo quiero que cambies el del nivel 1"
+      // So if Game Over -> Show Ad. If Level 1 Win -> No Ad.
+      
+      final bool hasWon = args['hasWon'];
+      
+      if (!hasWon) {
+         AdService().showInterstitial();
+      } else if (currentLevel != 1) {
+         AdService().showInterstitial();
+      }
     });
   }
 
