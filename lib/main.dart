@@ -11,6 +11,8 @@ import 'package:bvst/screens/options_screen.dart';
 import 'package:bvst/screens/login_screen.dart'; // <-- NUEVO
 import 'package:bvst/screens/level_selection_screen.dart';
 import 'package:bvst/screens/game_screen_lvl2.dart';
+import 'package:bvst/screens/game_screen_lvl3.dart'; // <-- NUEVO NIVEL 3
+import 'package:bvst/screens/game_screen_lvl4.dart'; // <-- NUEVO NIVEL 4
 import 'package:bvst/screens/shop_screen.dart'; // <-- NUEVO
 import 'package:supabase_flutter/supabase_flutter.dart'; // <-- NUEVO
 import 'package:bvst/services/ad_service.dart'; // <-- NUEVO
@@ -56,6 +58,8 @@ class MyApp extends StatelessWidget {
         '/options': (context) => const OptionsScreen(),
         '/level_selection': (context) => const LevelSelectionScreen(),
         '/game_lvl2': (context) => const GameScreenLevel2(),
+        '/game_lvl3': (context) => const GameScreenLevel3(), // <-- NUEVA RUTA NIVEL 3
+        '/game_lvl4': (context) => const GameScreenLevel4(), // <-- NUEVA RUTA NIVEL 4
       },
     );
   }

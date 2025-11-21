@@ -39,8 +39,8 @@ class Bullet extends SpriteAnimationComponent
         ),
       );
 
-      // Adjust size for animation
-      double newHeight = game.size.y * 0.06; // Slightly larger for fire
+      // Adjust size for animation - larger for enemies
+      double newHeight = game.size.y * 0.09; // Increased from 0.06 for bigger projectiles
       double newWidth = (spriteSize.x / spriteSize.y) * newHeight;
       size = Vector2(newWidth, newHeight);
     } else {
@@ -48,7 +48,13 @@ class Bullet extends SpriteAnimationComponent
       final sprite = await Sprite.load(spritePath);
       animation = SpriteAnimation.spriteList([sprite], stepTime: 1.0);
 
-      double newHeight = game.size.y * 0.04;
+      // Make enemy projectiles bigger for levels 2 and 3
+      double newHeight;
+      if (spritePath == 'ataque_lvl3.png' && !isPlayerBullet) {
+        newHeight = game.size.y * 0.08; // Larger for level 3 enemy projectiles
+      } else {
+        newHeight = game.size.y * 0.04; // Default size
+      }
       double newWidth =
           (sprite.originalSize.x / sprite.originalSize.y) * newHeight;
       size = Vector2(newWidth, newHeight);

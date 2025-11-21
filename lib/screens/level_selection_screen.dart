@@ -7,12 +7,41 @@ class LevelSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get level from arguments, default to 2 if not provided
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final int level = args?['level'] ?? 2;
+
+    // Level configuration
+    final levelConfig = {
+      2: {
+        'mapImage': 'Map_Lvl2.png',
+        'title': 'NIVEL 2',
+        'route': '/game_lvl2',
+      },
+      3: {
+        'mapImage': 'Map_Lvl3.png',
+        'title': 'NIVEL 3',
+        'route': '/game_lvl3',
+      },
+      4: {
+        'mapImage': 'Map_Lvl4.png',
+        'title': 'NIVEL 4',
+        'route': '/game_lvl4',
+      },
+    };
+
+    final config = levelConfig[level] ?? levelConfig[2]!;
+
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image (Map 2)
+          // Background Image (Dynamic based on level)
           Positioned.fill(
-            child: Image.asset('assets/images/Map_Lvl2.png', fit: BoxFit.fill, filterQuality: FilterQuality.high),
+            child: Image.asset(
+              'assets/images/${config['mapImage']}',
+              fit: BoxFit.fill,
+              filterQuality: FilterQuality.high,
+            ),
           ),
 
           // Overlay for better text visibility
@@ -27,7 +56,7 @@ class LevelSelectionScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'NIVEL 2',
+                    config['title'] as String,
                     style: GoogleFonts.orbitron(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
@@ -42,13 +71,16 @@ class LevelSelectionScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Start Level 2 Button
+                  // Start Level Button
                   Padding(
                     padding: const EdgeInsets.only(bottom: 20.0),
                     child: GestureDetector(
                       onTap: () {
                         AudioManager().stopAllAudio();
-                        Navigator.pushReplacementNamed(context, '/game_lvl2');
+                        Navigator.pushReplacementNamed(
+                          context,
+                          config['route'] as String,
+                        );
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -68,48 +100,7 @@ class LevelSelectionScreen extends StatelessWidget {
                           ],
                         ),
                         child: Text(
-                          'JUGAR NIVEL 2',
-                          style: GoogleFonts.pressStart2p(
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-
-                  // Back to Menu Button
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 50.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        AudioManager().stopAllAudio();
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/menu',
-                          (route) => false,
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 30,
-                          vertical: 15,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.white, width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.red.withOpacity(0.5),
-                              blurRadius: 10,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Text(
-                          'VOLVER AL MENÚ',
+                          'SIGUIENTE',
                           style: GoogleFonts.pressStart2p(
                             fontSize: 16,
                             color: Colors.white,

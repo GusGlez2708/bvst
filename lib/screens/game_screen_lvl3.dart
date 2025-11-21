@@ -1,31 +1,31 @@
 import 'dart:async';
 import 'package:bvst/game/audio_manager.dart';
-import 'package:bvst/game/battle_game_lvl2.dart';
+import 'package:bvst/game/battle_game_lvl3.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class GameScreenLevel2 extends StatefulWidget {
-  const GameScreenLevel2({super.key});
+class GameScreenLevel3 extends StatefulWidget {
+  const GameScreenLevel3({super.key});
 
   @override
-  State<GameScreenLevel2> createState() => _GameScreenLevel2State();
+  State<GameScreenLevel3> createState() => _GameScreenLevel3State();
 }
 
-class _GameScreenLevel2State extends State<GameScreenLevel2> {
+class _GameScreenLevel3State extends State<GameScreenLevel3> {
   int _countdown = 3;
   Timer? _timer;
   bool _isCountingDown = true;
-  late final BattleGameLevel2 _game;
+  late final BattleGameLevel3 _game;
 
   @override
   void initState() {
     super.initState();
-    _game = BattleGameLevel2(
+    _game = BattleGameLevel3(
       onGameOver: (hasWon) {
         if (mounted) {
           _game.pauseEngine();
-          AudioManager().stopAllPooledSfx(); // Detiene los SFX de los pools
+          AudioManager().stopAllPooledSfx();
           AudioManager().stopGameBgm();
 
           if (hasWon) {
@@ -37,7 +37,7 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> {
           Navigator.pushReplacementNamed(
             context,
             '/result',
-            arguments: {'hasWon': hasWon, 'currentLevel': 2},
+            arguments: {'hasWon': hasWon, 'currentLevel': 3},
           );
         }
       },
@@ -57,7 +57,7 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> {
         });
       } else {
         _timer?.cancel();
-        AudioManager().playGameBgm();
+        AudioManager().playGameBgm('musica_lvl3.mp3'); // Play Level 3 music
         setState(() {
           _isCountingDown = false;
           _game.player.startBehavior();
@@ -149,8 +149,8 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage(
-                        'assets/images/fondo_Ira.png',
-                      ), // Level 2 Background
+                        'assets/images/fondo_lvl3.png',
+                      ), // Level 3 Background
                       fit: BoxFit.fill,
                       filterQuality: FilterQuality.high,
                     ),

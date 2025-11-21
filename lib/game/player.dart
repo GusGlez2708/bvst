@@ -17,7 +17,8 @@ class Player extends SpriteComponent
   // --- State Management ---
   PlayerDirection _direction = PlayerDirection.none;
   bool _isShooting = false;
-  double _speed = 0.0;
+  double speed = 0.0; // Made public for level mechanics
+  double damageMultiplier = 1.0; // Made public for level mechanics (e.g., weakening)
 
   // --- Timers ---
   late Timer _shootCooldown;
@@ -103,7 +104,7 @@ class Player extends SpriteComponent
   }
 
   void startBehavior() {
-    _speed = 300.0;
+    speed = 300.0;
   }
 
   @override
@@ -115,10 +116,10 @@ class Player extends SpriteComponent
     // Lógica de movimiento
     switch (_direction) {
       case PlayerDirection.left:
-        position.x -= _speed * dt;
+        position.x -= speed * dt;
         break;
       case PlayerDirection.right:
-        position.x += _speed * dt;
+        position.x += speed * dt;
         break;
       case PlayerDirection.none:
         break;
@@ -199,7 +200,11 @@ class Player extends SpriteComponent
       if (_isInvincible) return;
 
       AudioManager().playGameSfx('damage_prota.mp3');
-      health--;
+      
+      // Apply damage multiplier (e.g., 2.0 when weakened, 1.0 normally)
+      final damageAmount = (1 * damageMultiplier).round();
+      health -= damageAmount;
+      
       other.removeFromParent();
 
       _isFlashing = true;

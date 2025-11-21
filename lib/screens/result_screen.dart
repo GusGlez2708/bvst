@@ -53,6 +53,19 @@ class _ResultScreenState extends State<ResultScreen>
     final Map<String, dynamic> args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final bool hasWon = args['hasWon'];
+    final int currentLevel = args['currentLevel'] ?? 1; // Default to level 1 if not specified
+
+    // Determine next level for preview screen
+    int? nextLevel;
+    if (currentLevel == 1) {
+      nextLevel = 2;
+    } else if (currentLevel == 2) {
+      nextLevel = 3;
+    } else if (currentLevel == 3) {
+      nextLevel = 4;
+    } else {
+      nextLevel = null; // No more levels after level 4
+    }
 
     // --- LÓGICA DE COLOR CONDICIONAL ---
     final Color primaryButtonColor;
@@ -96,7 +109,7 @@ class _ResultScreenState extends State<ResultScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (hasWon)
+                if (hasWon && nextLevel != null) // Show SIGUIENTE only if there's a next level
                   Padding(
                     padding: const EdgeInsets.only(bottom: 20.0),
                     child: _buildStyledButton(
@@ -113,6 +126,7 @@ class _ResultScreenState extends State<ResultScreen>
                               Navigator.pushReplacementNamed(
                                 context,
                                 '/level_selection',
+                                arguments: {'level': nextLevel},
                               );
                             }
                           : null,

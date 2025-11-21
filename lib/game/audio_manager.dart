@@ -78,7 +78,12 @@ class AudioManager {
       'menu_music.mp3',
       'victory.mp3',
       'defeat.mp3',
-      'FireUnder.mp3', // Not used in a pool, but good to cache
+      'FireUnder.mp3',
+      'musica_lvl3.mp3', // Level 3 background music
+      'poder_lvl3.mp3', // Level 3 slow power
+      'musica_lvl4.mp3', // Level 4 background music
+      'poder_lvl4.mp3', // Level 4 weakening power
+      'debilidad_lvl4.mp3', // Level 4 weakness loop
     ]);
   }
 
@@ -100,12 +105,12 @@ class AudioManager {
   }
 
   /// 3. Control de Música del Juego
-  void playGameBgm() {
+  void playGameBgm([String musicFile = 'bg_music.mp3']) {
     stopAllAudio();
     _isGameMusicPlaying = true;
     _isMenuMusicPlaying = false;
     if (!_bgmMuted) {
-      FlameAudio.bgm.play('bg_music.mp3', volume: _bgmVolume);
+      FlameAudio.bgm.play(musicFile, volume: _bgmVolume);
     }
   }
 
@@ -113,6 +118,20 @@ class AudioManager {
     if (_isGameMusicPlaying) {
       FlameAudio.bgm.stop();
       _isGameMusicPlaying = false;
+    }
+  }
+
+  /// Pause game background music
+  void pauseGameBgm() {
+    if (_isGameMusicPlaying && !_bgmMuted) {
+      FlameAudio.bgm.pause();
+    }
+  }
+
+  /// Resume game background music
+  void resumeGameBgm() {
+    if (_isGameMusicPlaying && !_bgmMuted) {
+      FlameAudio.bgm.resume();
     }
   }
 

@@ -39,7 +39,7 @@ class _GameScreenState extends State<GameScreen> {
           Navigator.pushReplacementNamed(
             context,
             '/result',
-            arguments: {'hasWon': hasWon},
+            arguments: {'hasWon': hasWon, 'currentLevel': 1},
           );
         }
       },
