@@ -107,90 +107,93 @@ class _ResultScreenState extends State<ResultScreen>
 
     final String buttonText = 'VOLVER AL MENÚ';
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          // --- Fondo de pantalla ---
-          Positioned.fill(
-            child: Image.asset(
-              backgroundImage,
-              fit: BoxFit.fill,
-              filterQuality: FilterQuality.high,
+    return PopScope(
+      canPop: false, // Disable back button
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // --- Fondo de pantalla ---
+            Positioned.fill(
+              child: Image.asset(
+                backgroundImage,
+                fit: BoxFit.fill,
+                filterQuality: FilterQuality.high,
+              ),
             ),
-          ),
 
-          // --- Botón posicionado ---
-          Align(
-            alignment: const Alignment(0.0, 0.65), // Posición (más arriba)
-            // ¡Ya no usamos el widget Opacity aquí!
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (hasWon && nextLevel != null) // Show SIGUIENTE only if there's a next level
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 20.0),
-                    child: _buildStyledButton(
-                      text: 'SIGUIENTE',
-                      colors: (
-                        button: const Color(0xFF4CAF50), // Verde
-                        text: Colors.white,
-                        border: const Color(0xFF81C784),
+            // --- Botón posicionado ---
+            Align(
+              alignment: const Alignment(0.0, 0.65), // Posición (más arriba)
+              // ¡Ya no usamos el widget Opacity aquí!
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (hasWon && nextLevel != null) // Show SIGUIENTE only if there's a next level
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20.0),
+                      child: _buildStyledButton(
+                        text: 'SIGUIENTE',
+                        colors: (
+                          button: const Color(0xFF4CAF50), // Verde
+                          text: Colors.white,
+                          border: const Color(0xFF81C784),
+                        ),
+                        opacity: _fadeAnimation.value,
+                        onTap: _isButtonEnabled
+                            ? () {
+                                AudioManager().stopAllAudio();
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  '/level_selection',
+                                  arguments: {'level': nextLevel},
+                                );
+                              }
+                            : null,
                       ),
-                      opacity: _fadeAnimation.value,
-                      onTap: _isButtonEnabled
-                          ? () {
-                              AudioManager().stopAllAudio();
-                              Navigator.pushReplacementNamed(
-                                context,
-                                '/level_selection',
-                                arguments: {'level': nextLevel},
-                              );
-                            }
-                          : null,
                     ),
-                  ),
-                if (hasWon)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 20.0),
-                    child: _buildStyledButton(
-                      text: 'TIENDA',
-                      colors: (
-                        button: const Color(0xFFFFA500), // Orange
-                        text: Colors.white,
-                        border: const Color(0xFFFFB84D),
+                  if (hasWon)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20.0),
+                      child: _buildStyledButton(
+                        text: 'TIENDA',
+                        colors: (
+                          button: const Color(0xFFFFA500), // Orange
+                          text: Colors.white,
+                          border: const Color(0xFFFFB84D),
+                        ),
+                        opacity: _fadeAnimation.value,
+                        onTap: _isButtonEnabled
+                            ? () {
+                                Navigator.pushNamed(context, '/shop');
+                              }
+                            : null,
                       ),
-                      opacity: _fadeAnimation.value,
-                      onTap: _isButtonEnabled
-                          ? () {
-                              Navigator.pushNamed(context, '/shop');
-                            }
-                          : null,
                     ),
+                  _buildStyledButton(
+                    text: buttonText,
+                    colors: (
+                      button: primaryButtonColor,
+                      text: primaryTextColor,
+                      border: primaryBorderColor,
+                    ),
+                    // Pasamos el valor de la animación directamente al botón
+                    opacity: _fadeAnimation.value,
+                    onTap: _isButtonEnabled
+                        ? () {
+                            AudioManager().stopAllAudio();
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              '/menu',
+                              (route) => false,
+                            );
+                          }
+                        : null,
                   ),
-                _buildStyledButton(
-                  text: buttonText,
-                  colors: (
-                    button: primaryButtonColor,
-                    text: primaryTextColor,
-                    border: primaryBorderColor,
-                  ),
-                  // Pasamos el valor de la animación directamente al botón
-                  opacity: _fadeAnimation.value,
-                  onTap: _isButtonEnabled
-                      ? () {
-                          AudioManager().stopAllAudio();
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            '/menu',
-                            (route) => false,
-                          );
-                        }
-                      : null,
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

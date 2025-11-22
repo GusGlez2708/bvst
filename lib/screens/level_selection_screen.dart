@@ -32,88 +32,91 @@ class LevelSelectionScreen extends StatelessWidget {
 
     final config = levelConfig[level] ?? levelConfig[2]!;
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Background Image (Dynamic based on level)
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/${config['mapImage']}',
-              fit: BoxFit.fill,
-              filterQuality: FilterQuality.high,
+    return PopScope(
+      canPop: false, // Disable back button
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // Background Image (Dynamic based on level)
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/${config['mapImage']}',
+                fit: BoxFit.fill,
+                filterQuality: FilterQuality.high,
+              ),
             ),
-          ),
 
-          // Overlay for better text visibility
-          Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.3)),
-          ),
+            // Overlay for better text visibility
+            Positioned.fill(
+              child: Container(color: Colors.black.withOpacity(0.3)),
+            ),
 
-          // Content
-          SafeArea(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    config['title'] as String,
-                    style: GoogleFonts.orbitron(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [
-                        const Shadow(
-                          blurRadius: 10.0,
-                          color: Colors.black,
-                          offset: Offset(2.0, 2.0),
-                        ),
-                      ],
+            // Content
+            SafeArea(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      config['title'] as String,
+                      style: GoogleFonts.orbitron(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          const Shadow(
+                            blurRadius: 10.0,
+                            color: Colors.black,
+                            offset: Offset(2.0, 2.0),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Start Level Button
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 20.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        AudioManager().stopAllAudio();
-                        Navigator.pushReplacementNamed(
-                          context,
-                          config['route'] as String,
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 30,
-                          vertical: 15,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.white, width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.orange.withOpacity(0.5),
-                              blurRadius: 10,
-                              spreadRadius: 2,
+                    const SizedBox(height: 20),
+                    // Start Level Button
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          AudioManager().stopAllAudio();
+                          Navigator.pushReplacementNamed(
+                            context,
+                            config['route'] as String,
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 30,
+                            vertical: 15,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.white, width: 2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.orange.withOpacity(0.5),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            'SIGUIENTE',
+                            style: GoogleFonts.pressStart2p(
+                              fontSize: 16,
+                              color: Colors.white,
                             ),
-                          ],
-                        ),
-                        child: Text(
-                          'SIGUIENTE',
-                          style: GoogleFonts.pressStart2p(
-                            fontSize: 16,
-                            color: Colors.white,
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/game/battle_game_lvl3.dart';
+import 'package:bvst/screens/pause_menu.dart'; // <-- Importar PauseMenu
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:bvst/services/ad_service.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class GameScreenLevel3 extends StatefulWidget {
   const GameScreenLevel3({super.key});
@@ -12,15 +15,17 @@ class GameScreenLevel3 extends StatefulWidget {
   State<GameScreenLevel3> createState() => _GameScreenLevel3State();
 }
 
-class _GameScreenLevel3State extends State<GameScreenLevel3> {
+class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBindingObserver { // <-- Agregar Observer
   int _countdown = 3;
   Timer? _timer;
   bool _isCountingDown = true;
   late final BattleGameLevel3 _game;
+  bool _isPaused = false; // <-- Estado de pausa
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this); // <-- Registrar observer
     _game = BattleGameLevel3(
       onGameOver: (hasWon) {
         if (mounted) {
@@ -43,6 +48,24 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> {
       },
     );
     _startCountdown();
+    AdService().loadBanner();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // <-- Eliminar observer
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  // --- AUTO-PAUSE ---
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      if (!_isPaused && !_isCountingDown) {
+        _pauseGame();
+      }
+    }
   }
 
   void _startCountdown() {
@@ -67,10 +90,21 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> {
     });
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+  // --- MÉTODOS DE PAUSA ---
+  void _pauseGame() {
+    setState(() {
+      _isPaused = true;
+    });
+    _game.pauseEngine();
+    AudioManager().pauseGameBgm();
+  }
+
+  void _resumeGame() {
+    setState(() {
+      _isPaused = false;
+    });
+    _game.resumeEngine();
+    AudioManager().resumeGameBgm();
   }
 
   // --- WIDGET: JOYSTICK DE MOVIMIENTO ---
@@ -132,63 +166,104 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        top: false,
-        bottom: false,
-        child: Stack(
-          children: [
-            GameWidget(
-              game: _game,
-              backgroundBuilder: (context) {
-                return Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(
-                        'assets/images/fondo_lvl3.png',
-                      ), // Level 3 Background
-                      fit: BoxFit.fill,
-                      filterQuality: FilterQuality.high,
+    return PopScope( // <-- Wrap Scaffold in PopScope
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (!_isPaused && !_isCountingDown) {
+          _pauseGame();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        resizeToAvoidBottomInset: false,
+        bottomNavigationBar: AdService().getBannerAd() != null
+            ? SizedBox(
+                height: AdService().getBannerAd()!.size.height.toDouble(),
+                width: AdService().getBannerAd()!.size.width.toDouble(),
+                child: AdWidget(ad: AdService().getBannerAd()!),
+              )
+            : null,
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Stack(
+            children: [
+              GameWidget(
+                game: _game,
+                backgroundBuilder: (context) {
+                  return Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(
+                          'assets/images/fondo_lvl3.png',
+                        ), // Level 3 Background
+                        fit: BoxFit.fill,
+                        filterQuality: FilterQuality.high,
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
 
-            if (_isCountingDown)
-              Container(
-                color: Colors.black.withAlpha(150),
-                child: Center(
-                  child: Text(
-                    _countdown > 0 ? _countdown.toString() : '¡YA!',
-                    style: GoogleFonts.orbitron(
-                      fontSize: 100,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+              if (_isCountingDown)
+                Container(
+                  color: Colors.black.withAlpha(150),
+                  child: Center(
+                    child: Text(
+                      _countdown > 0 ? _countdown.toString() : '¡YA!',
+                      style: GoogleFonts.orbitron(
+                        fontSize: 100,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-            if (!_isCountingDown)
-              Positioned(
-                bottom: 30,
-                left: 30,
-                right: 30,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildMovementJoystick(),
-                    _buildAttractiveShootButton(),
-                  ],
+              if (!_isCountingDown && !_isPaused) ...[
+                Positioned(
+                  bottom: 30,
+                  left: 30,
+                  right: 30,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _buildMovementJoystick(),
+                      _buildAttractiveShootButton(),
+                    ],
+                  ),
                 ),
-              ),
-          ],
+                // --- BOTÓN DE PAUSA ---
+                Positioned(
+                  top: 20,
+                  right: 20,
+                  child: GestureDetector(
+                    onTap: _pauseGame,
+                    child: Image.asset(
+                      'assets/images/pause.png',
+                      width: 50,
+                      height: 50,
+                    ),
+                  ),
+                ),
+              ],
+
+              // --- MENÚ DE PAUSA ---
+              if (_isPaused)
+                PauseMenu(
+                  onResume: _resumeGame,
+                  onQuit: () {
+                    AudioManager().stopGameBgm();
+                    AudioManager().playMenuBgm();
+                    Navigator.of(context).pop();
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );

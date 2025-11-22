@@ -104,6 +104,20 @@ class AudioManager {
     }
   }
 
+  /// Pause menu background music
+  void pauseMenuBgm() {
+    if (_isMenuMusicPlaying && !_bgmMuted) {
+      FlameAudio.bgm.pause();
+    }
+  }
+
+  /// Resume menu background music
+  void resumeMenuBgm() {
+    if (_isMenuMusicPlaying && !_bgmMuted) {
+      FlameAudio.bgm.resume();
+    }
+  }
+
   /// 3. Control de Música del Juego
   void playGameBgm([String musicFile = 'bg_music.mp3']) {
     stopAllAudio();
@@ -162,7 +176,7 @@ class AudioManager {
 
   /// 5. Reproductor de SFX de UI
   void playUiSfx(String filename) {
-    stopAllAudio();
+    // stopAllAudio(); // <-- REMOVED: Don't stop BGM/SFX when playing UI sounds
     if (_sfxMuted) return;
     _uiSfxPlayer.play(AssetSource('audio/$filename'), volume: _sfxVolume);
   }
