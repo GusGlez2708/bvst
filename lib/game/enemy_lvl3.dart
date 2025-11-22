@@ -30,7 +30,7 @@ class EnemyLevel3 extends Enemy {
     );
 
     // Override size
-    double newHeight = game.size.y * 0.25;
+    double newHeight = game.size.y * 0.40;
     double newWidth = (spriteSize.x / spriteSize.y) * newHeight;
     size = Vector2(newWidth, newHeight);
 

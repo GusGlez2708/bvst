@@ -44,9 +44,9 @@ class BattleGame extends FlameGame with HasCollisionDetection {
     final paint = Paint();
     final healthPercentage = enemy.health / enemy.maxHealth;
 
-    const barHeight = 30.0;
-    const barTop = 20.0;
-    const sidePadding = 20.0;
+    const barHeight = 15.0;
+    const barTop = 22.0;
+    const sidePadding = 100.0;
     final barWidth = size.x - (sidePadding * 2);
 
     // Health bar background (dark gray)

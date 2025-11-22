@@ -20,7 +20,7 @@ class EnemyLevel4 extends Enemy {
     // But we need to set up the basics
     
     // Set health for Level 4 boss
-    health = 20; // Example high health
+    health = 2; // Example high health
     maxHealth = health;
 
     // Size matches screen to cover the background area logic

@@ -1,5 +1,6 @@
 import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/services/ad_service.dart'; // <-- NUEVO
+import 'package:bvst/services/progress_service.dart'; // Import ProgressService
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -36,20 +37,36 @@ class _ResultScreenState extends State<ResultScreen>
             }
           });
 
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(seconds: 1), () async {
       _animationController.forward();
       // Check if we should show ad (not on level 1 win)
       final Map<String, dynamic> args =
           ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
       final int currentLevel = args['currentLevel'] ?? 1;
+      final bool hasWon = args['hasWon'];
+
+      // Save Progress Logic
+      if (hasWon) {
+        final progressService = ProgressService();
+        int nextLevelToSave = currentLevel + 1;
+        
+        // If completed level 4, reset to level 1
+        if (currentLevel >= 4) {
+          nextLevelToSave = 1;
+        }
+        
+        // Only save if the new level is higher than what's currently saved?
+        // Actually, user wants strict progression: "si gano el nivel 1 ... me llevara al nivel 2"
+        // "si pasa todos los niveles ... se reinicia ... empieza desde el nivel 1"
+        // So we just overwrite the saved level with the next one.
+        await progressService.saveLevel(nextLevelToSave);
+      }
       
       // Show ad only if NOT level 1 (or if you want to show it on game over regardless of level, adjust logic)
       // User request: "solo quiero que cambies el del nivel 1, quiero que lo quites"
       // Assuming this means remove it from Level 1 completion/gameover? 
       // "el que aparece cuando se muere el jugador esta bien, ahora, solo quiero que cambies el del nivel 1"
       // So if Game Over -> Show Ad. If Level 1 Win -> No Ad.
-      
-      final bool hasWon = args['hasWon'];
       
       if (!hasWon) {
          AdService().showInterstitial();

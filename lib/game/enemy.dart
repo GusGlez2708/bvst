@@ -9,7 +9,7 @@ import 'package:bvst/game/game_state.dart';
 
 class Enemy extends SpriteAnimationComponent
     with HasGameReference<BattleGame>, CollisionCallbacks {
-  int health = 15;
+  int health = 1;
   late int maxHealth;
   double speed = 0.0;
   int direction = 1;

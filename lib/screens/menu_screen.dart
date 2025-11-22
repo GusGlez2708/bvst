@@ -1,4 +1,5 @@
 import 'package:bvst/game/audio_manager.dart';
+import 'package:bvst/services/progress_service.dart'; // Import ProgressService
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -64,9 +65,20 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
                 // Botón JUGAR
                 _buildStyledButton(
                   text: 'JUGAR',
-                  onTap: () {
+                  onTap: () async {
                     // AudioManager().playUiSfx('start.mp3'); // <-- REMOVED: User requested BGM only
-                    Navigator.pushNamed(context, '/game');
+                    
+                    final progressService = ProgressService();
+                    final savedLevel = await progressService.getSavedLevel();
+                    
+                    String route = '/game';
+                    if (savedLevel == 2) route = '/game_lvl2';
+                    if (savedLevel == 3) route = '/game_lvl3';
+                    if (savedLevel == 4) route = '/game_lvl4';
+                    
+                    if (context.mounted) {
+                      Navigator.pushNamed(context, route);
+                    }
                   },
                 ),
                 const SizedBox(height: 15), // Espacio entre botones (reducido)
