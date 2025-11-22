@@ -87,7 +87,13 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         setState(() {
           _isCountingDown = false;
           _game.player.startBehavior();
-          _game.enemy.startBehavior();
+        });
+        
+        // Add 1 second delay for enemy attack
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted && !_isPaused) {
+             _game.enemy.startBehavior();
+          }
         });
       }
     });
