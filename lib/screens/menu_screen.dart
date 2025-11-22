@@ -65,7 +65,7 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
                 _buildStyledButton(
                   text: 'JUGAR',
                   onTap: () {
-                    AudioManager().playUiSfx('start.mp3');
+                    // AudioManager().playUiSfx('start.mp3'); // <-- REMOVED: User requested BGM only
                     Navigator.pushNamed(context, '/game');
                   },
                 ),
@@ -74,7 +74,10 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
                 _buildStyledButton(
                   text: 'TIENDA',
                   onTap: () {
-                    Navigator.pushNamed(context, '/shop');
+                    Navigator.pushNamed(context, '/shop').then((_) {
+                      // Al regresar de la tienda, reiniciar música del menú
+                      AudioManager().playMenuBgm();
+                    });
                   },
                 ),
                 const SizedBox(height: 15),

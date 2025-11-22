@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/game/battle_game.dart';
-import 'package:bvst/screens/pause_menu.dart'; // <-- Importar PauseMenu
+import 'package:bvst/screens/pause_menu.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,21 +15,22 @@ class GameScreen extends StatefulWidget {
   State<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver { // <-- Agregar Observer
-  int _countdown = 3;
+class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
+  int _countdown = 1;
   Timer? _timer;
   bool _isCountingDown = true;
   late final BattleGame _game;
-  bool _isPaused = false; // <-- Estado de pausa
+  bool _isPaused = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // <-- Registrar observer
+    WidgetsBinding.instance.addObserver(this);
     _game = BattleGame(
       onGameOver: (hasWon) {
         if (mounted) {
           _game.pauseEngine();
+          AudioManager().stopAllPooledSfx();
           AudioManager().stopGameBgm();
 
           if (hasWon) {
@@ -47,17 +48,20 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver { /
       },
     );
     _startCountdown();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      AudioManager().playUiSfx('contador.mp3');
+    });
+    // AudioManager().playGameBgm(); // <-- Moved to after countdown
     AdService().loadBanner();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // <-- Eliminar observer
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     super.dispose();
   }
 
-  // --- AUTO-PAUSE ---
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
@@ -69,17 +73,17 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver { /
 
   void _startCountdown() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_countdown > 1) {
+      if (_countdown < 3) {
         setState(() {
-          _countdown--;
+          _countdown++;
         });
-      } else if (_countdown == 1) {
+      } else if (_countdown == 3) {
         setState(() {
-          _countdown--;
+          _countdown++;
         });
       } else {
         _timer?.cancel();
-        AudioManager().playGameBgm();
+        AudioManager().playGameBgm(); // <-- Start BGM here
         setState(() {
           _isCountingDown = false;
           _game.player.startBehavior();
@@ -89,7 +93,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver { /
     });
   }
 
-  // --- MÉTODOS DE PAUSA ---
   void _pauseGame() {
     setState(() {
       _isPaused = true;
@@ -106,7 +109,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver { /
     AudioManager().resumeGameBgm();
   }
 
-  // --- WIDGET: JOYSTICK DE MOVIMIENTO ---
   Widget _buildMovementJoystick() {
     return GestureDetector(
       onPanUpdate: (details) {
@@ -141,7 +143,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver { /
     );
   }
 
-  // --- WIDGET: BOTÓN DE DISPARO ATRACTIVO ---
   Widget _buildAttractiveShootButton() {
     return GestureDetector(
       onTap: _game.player.shoot,
@@ -173,7 +174,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver { /
 
   @override
   Widget build(BuildContext context) {
-    return PopScope( // <-- Wrap Scaffold in PopScope
+    return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
@@ -212,14 +213,12 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver { /
                   );
                 },
               ),
-
-              // --- SUPERPOSICIÓN DE CONTROLES (HUD) ---
               if (_isCountingDown)
                 Container(
                   color: Colors.black.withAlpha(150),
                   child: Center(
                     child: Text(
-                      _countdown > 0 ? _countdown.toString() : '¡YA!',
+                      _countdown > 3 ? 'GO' : _countdown.toString(),
                       style: GoogleFonts.orbitron(
                         fontSize: 100,
                         fontWeight: FontWeight.bold,
@@ -228,9 +227,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver { /
                     ),
                   ),
                 ),
-
-              // --- CONTROLES DE JUEGO ---
-              if (!_isCountingDown && !_isPaused) ...[ // Ocultar controles si está pausado
+              if (!_isCountingDown && !_isPaused) ...[
                 Positioned(
                   bottom: 30,
                   left: 30,
@@ -244,7 +241,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver { /
                     ],
                   ),
                 ),
-                // --- BOTÓN DE PAUSA ---
                 Positioned(
                   top: 20,
                   right: 20,
@@ -258,15 +254,13 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver { /
                   ),
                 ),
               ],
-
-              // --- MENÚ DE PAUSA ---
               if (_isPaused)
                 PauseMenu(
                   onResume: _resumeGame,
                   onQuit: () {
                     AudioManager().stopGameBgm();
                     AudioManager().playMenuBgm();
-                    Navigator.of(context).pop(); // Volver al menú anterior (MenuScreen)
+                    Navigator.of(context).pop();
                   },
                 ),
             ],

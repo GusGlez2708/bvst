@@ -86,7 +86,7 @@ class BattleGameLevel4 extends BattleGame {
     _boss.isVulnerable = false;
     
     // Start attack spawner
-    _attackTimer = Timer(0.7, onTick: _spawnAttacks, repeat: true);
+    _attackTimer = Timer(0.9, onTick: _spawnAttacks, repeat: true);
     _attackTimer!.start();
     
     // Schedule end of evasion phase (13 seconds)

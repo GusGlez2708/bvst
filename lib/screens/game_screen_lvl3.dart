@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/game/battle_game_lvl3.dart';
-import 'package:bvst/screens/pause_menu.dart'; // <-- Importar PauseMenu
+import 'package:bvst/screens/pause_menu.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,17 +15,17 @@ class GameScreenLevel3 extends StatefulWidget {
   State<GameScreenLevel3> createState() => _GameScreenLevel3State();
 }
 
-class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBindingObserver { // <-- Agregar Observer
-  int _countdown = 3;
+class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBindingObserver {
+  int _countdown = 1;
   Timer? _timer;
   bool _isCountingDown = true;
   late final BattleGameLevel3 _game;
-  bool _isPaused = false; // <-- Estado de pausa
+  bool _isPaused = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // <-- Registrar observer
+    WidgetsBinding.instance.addObserver(this);
     _game = BattleGameLevel3(
       onGameOver: (hasWon) {
         if (mounted) {
@@ -48,17 +48,20 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBinding
       },
     );
     _startCountdown();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      AudioManager().playUiSfx('contador.mp3');
+    });
+    // AudioManager().playGameBgm('musica_lvl3.mp3'); // <-- Moved to after countdown
     AdService().loadBanner();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // <-- Eliminar observer
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     super.dispose();
   }
 
-  // --- AUTO-PAUSE ---
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
@@ -70,17 +73,17 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBinding
 
   void _startCountdown() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_countdown > 1) {
+      if (_countdown < 3) {
         setState(() {
-          _countdown--;
+          _countdown++;
         });
-      } else if (_countdown == 1) {
+      } else if (_countdown == 3) {
         setState(() {
-          _countdown--;
+          _countdown++;
         });
       } else {
         _timer?.cancel();
-        AudioManager().playGameBgm('musica_lvl3.mp3'); // Play Level 3 music
+        AudioManager().playGameBgm('musica_lvl3.mp3'); // <-- Start Level 3 BGM here
         setState(() {
           _isCountingDown = false;
           _game.player.startBehavior();
@@ -90,7 +93,6 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBinding
     });
   }
 
-  // --- MÉTODOS DE PAUSA ---
   void _pauseGame() {
     setState(() {
       _isPaused = true;
@@ -107,7 +109,6 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBinding
     AudioManager().resumeGameBgm();
   }
 
-  // --- WIDGET: JOYSTICK DE MOVIMIENTO ---
   Widget _buildMovementJoystick() {
     return GestureDetector(
       onPanUpdate: (details) {
@@ -138,7 +139,6 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBinding
     );
   }
 
-  // --- WIDGET: BOTÓN DE DISPARO ATRACTIVO ---
   Widget _buildAttractiveShootButton() {
     return GestureDetector(
       onTap: _game.player.shoot,
@@ -158,7 +158,11 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBinding
           ],
         ),
         child: const Center(
-          child: Icon(Icons.arrow_upward, color: Colors.white, size: 40),
+          child: Icon(
+            Icons.arrow_upward,
+            color: Colors.white,
+            size: 40,
+          ),
         ),
       ),
     );
@@ -166,7 +170,7 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBinding
 
   @override
   Widget build(BuildContext context) {
-    return PopScope( // <-- Wrap Scaffold in PopScope
+    return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
@@ -197,9 +201,7 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBinding
                     height: double.infinity,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage(
-                          'assets/images/fondo_lvl3.png',
-                        ), // Level 3 Background
+                        image: AssetImage('assets/images/fondo_lvl3.png'),
                         fit: BoxFit.fill,
                         filterQuality: FilterQuality.high,
                       ),
@@ -207,13 +209,12 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBinding
                   );
                 },
               ),
-
               if (_isCountingDown)
                 Container(
                   color: Colors.black.withAlpha(150),
                   child: Center(
                     child: Text(
-                      _countdown > 0 ? _countdown.toString() : '¡YA!',
+                      _countdown > 3 ? 'GO' : _countdown.toString(),
                       style: GoogleFonts.orbitron(
                         fontSize: 100,
                         fontWeight: FontWeight.bold,
@@ -222,7 +223,6 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBinding
                     ),
                   ),
                 ),
-
               if (!_isCountingDown && !_isPaused) ...[
                 Positioned(
                   bottom: 30,
@@ -237,7 +237,6 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBinding
                     ],
                   ),
                 ),
-                // --- BOTÓN DE PAUSA ---
                 Positioned(
                   top: 20,
                   right: 20,
@@ -251,8 +250,6 @@ class _GameScreenLevel3State extends State<GameScreenLevel3> with WidgetsBinding
                   ),
                 ),
               ],
-
-              // --- MENÚ DE PAUSA ---
               if (_isPaused)
                 PauseMenu(
                   onResume: _resumeGame,

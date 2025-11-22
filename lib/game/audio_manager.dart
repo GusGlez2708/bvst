@@ -85,12 +85,16 @@ class AudioManager {
       'poder_lvl4.mp3', // Level 4 weakening power
       'debilidad_lvl4.mp3', // Level 4 weakness loop
       'grito.mp3',
+      'contador.mp3',
     ]);
   }
 
   /// 2. Control de Música del Menú
   void playMenuBgm() {
-    stopAllAudio();
+    // stopAllAudio(); // <-- MODIFICADO: No detener todo para no cortar SFX de UI
+    FlameAudio.bgm.stop(); // Detener BGM anterior
+    stopAllPooledSfx(); // Detener loops de juego
+    
     _isMenuMusicPlaying = true;
     _isGameMusicPlaying = false;
     if (!_bgmMuted) {
@@ -121,7 +125,11 @@ class AudioManager {
 
   /// 3. Control de Música del Juego
   void playGameBgm([String musicFile = 'bg_music.mp3']) {
-    stopAllAudio();
+    // stopAllAudio(); // <-- MODIFICADO
+    FlameAudio.bgm.stop();
+    stopAllPooledSfx();
+    // stopUiSfx(); // <-- Removed to prevent cutting off countdown sound
+
     _isGameMusicPlaying = true;
     _isMenuMusicPlaying = false;
     if (!_bgmMuted) {
@@ -180,6 +188,10 @@ class AudioManager {
     // stopAllAudio(); // <-- REMOVED: Don't stop BGM/SFX when playing UI sounds
     if (_sfxMuted) return;
     _uiSfxPlayer.play(AssetSource('audio/$filename'), volume: _sfxVolume);
+  }
+
+  void stopUiSfx() {
+    _uiSfxPlayer.stop();
   }
 
   /// 6. Detiene todos los SFX de los pools que estamos rastreando.

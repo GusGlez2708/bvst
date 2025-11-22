@@ -87,7 +87,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _onAuthSuccess() {
-    AudioManager().playUiSfx('start.mp3');
     Navigator.pushReplacementNamed(context, '/menu');
   }
 

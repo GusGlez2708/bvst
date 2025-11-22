@@ -368,7 +368,6 @@ class _ShopScreenState extends State<ShopScreen> {
             left: 20,
             child: GestureDetector(
               onTap: () {
-                AudioManager().playUiSfx('start.mp3');
                 Navigator.pop(context);
               },
               child: Container(

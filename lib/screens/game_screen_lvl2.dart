@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/game/battle_game_lvl2.dart';
-import 'package:bvst/screens/pause_menu.dart'; // <-- Importar PauseMenu
+import 'package:bvst/screens/pause_menu.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,17 +15,17 @@ class GameScreenLevel2 extends StatefulWidget {
   State<GameScreenLevel2> createState() => _GameScreenLevel2State();
 }
 
-class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBindingObserver { // <-- Agregar Observer
-  int _countdown = 3;
+class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBindingObserver {
+  int _countdown = 1;
   Timer? _timer;
   bool _isCountingDown = true;
   late final BattleGameLevel2 _game;
-  bool _isPaused = false; // <-- Estado de pausa
+  bool _isPaused = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // <-- Registrar observer
+    WidgetsBinding.instance.addObserver(this);
     _game = BattleGameLevel2(
       onGameOver: (hasWon) {
         if (mounted) {
@@ -48,17 +48,20 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBinding
       },
     );
     _startCountdown();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      AudioManager().playUiSfx('contador.mp3');
+    });
+    // AudioManager().playGameBgm(); // <-- Moved to after countdown
     AdService().loadBanner();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // <-- Eliminar observer
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     super.dispose();
   }
 
-  // --- AUTO-PAUSE ---
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
@@ -70,17 +73,17 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBinding
 
   void _startCountdown() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_countdown > 1) {
+      if (_countdown < 3) {
         setState(() {
-          _countdown--;
+          _countdown++;
         });
-      } else if (_countdown == 1) {
+      } else if (_countdown == 3) {
         setState(() {
-          _countdown--;
+          _countdown++;
         });
       } else {
         _timer?.cancel();
-        AudioManager().playGameBgm();
+        AudioManager().playGameBgm(); // <-- Start BGM here
         setState(() {
           _isCountingDown = false;
           _game.player.startBehavior();
@@ -90,7 +93,6 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBinding
     });
   }
 
-  // --- MÉTODOS DE PAUSA ---
   void _pauseGame() {
     setState(() {
       _isPaused = true;
@@ -107,7 +109,6 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBinding
     AudioManager().resumeGameBgm();
   }
 
-  // --- WIDGET: JOYSTICK DE MOVIMIENTO ---
   Widget _buildMovementJoystick() {
     return GestureDetector(
       onPanUpdate: (details) {
@@ -138,7 +139,6 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBinding
     );
   }
 
-  // --- WIDGET: BOTÓN DE DISPARO ATRACTIVO ---
   Widget _buildAttractiveShootButton() {
     return GestureDetector(
       onTap: _game.player.shoot,
@@ -166,7 +166,7 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBinding
 
   @override
   Widget build(BuildContext context) {
-    return PopScope( // <-- Wrap Scaffold in PopScope
+    return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
@@ -197,9 +197,7 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBinding
                     height: double.infinity,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage(
-                          'assets/images/fondo_Ira.png',
-                        ), // Level 2 Background
+                        image: AssetImage('assets/images/fondo_Ira.png'),
                         fit: BoxFit.fill,
                         filterQuality: FilterQuality.high,
                       ),
@@ -207,13 +205,12 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBinding
                   );
                 },
               ),
-
               if (_isCountingDown)
                 Container(
                   color: Colors.black.withAlpha(150),
                   child: Center(
                     child: Text(
-                      _countdown > 0 ? _countdown.toString() : '¡YA!',
+                      _countdown > 3 ? 'GO' : _countdown.toString(),
                       style: GoogleFonts.orbitron(
                         fontSize: 100,
                         fontWeight: FontWeight.bold,
@@ -222,7 +219,6 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBinding
                     ),
                   ),
                 ),
-
               if (!_isCountingDown && !_isPaused) ...[
                 Positioned(
                   bottom: 30,
@@ -237,7 +233,6 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBinding
                     ],
                   ),
                 ),
-                // --- BOTÓN DE PAUSA ---
                 Positioned(
                   top: 20,
                   right: 20,
@@ -251,8 +246,6 @@ class _GameScreenLevel2State extends State<GameScreenLevel2> with WidgetsBinding
                   ),
                 ),
               ],
-
-              // --- MENÚ DE PAUSA ---
               if (_isPaused)
                 PauseMenu(
                   onResume: _resumeGame,
