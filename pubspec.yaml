@@ -1,5 +1,5 @@
 name: bvst
-description: "A new Flutter project."
+description: "Echoes of Viridis game."
 publish_to: 'none'
 version: 0.1.0
 
@@ -19,6 +19,7 @@ dependencies:
   google_mobile_ads: ^5.0.0
   flutter_stripe: ^10.0.0
   http: ^1.2.0
+  icons_launcher: ^3.0.3
 
 dev_dependencies:
   flutter_test:

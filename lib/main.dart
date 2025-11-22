@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Battle Chase',
+      title: 'Echoes of Viridis',
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/login', // <-- CAMBIADO DE '/menu' a '/login'
       routes: {
