@@ -9,15 +9,15 @@ import 'package:bvst/game/game_state.dart';
 
 class Enemy extends SpriteAnimationComponent
     with HasGameReference<BattleGame>, CollisionCallbacks {
-  int health = 1;
+  int health = 15;
   late int maxHealth;
   double speed = 0.0;
   int direction = 1;
-  late Timer _shootTimer;
+  Timer shootTimer; // Changed from _shootTimer
   bool canShoot = false;
-  bool _isEnraged = false; // Enrage flag
+  bool isEnraged = false; // Changed from _isEnraged
 
-  Enemy() : super(anchor: Anchor.center);
+  Enemy() : shootTimer = Timer(1.5), super(anchor: Anchor.center); // Initialize with dummy timer
 
   @override
   Future<void> onLoad() async {
@@ -37,7 +37,7 @@ class Enemy extends SpriteAnimationComponent
     position = Vector2(game.size.x / 2, size.y / 2 + 50);
     add(RectangleHitbox());
 
-    _shootTimer = Timer(1.5, onTick: shoot, repeat: true);
+    shootTimer = Timer(1.5, onTick: shoot, repeat: true); // Changed from _shootTimer
   }
 
   void shoot() {
@@ -53,7 +53,7 @@ class Enemy extends SpriteAnimationComponent
   void startBehavior() {
     canShoot = true;
     speed = 200.0;
-    _shootTimer.start();
+    shootTimer.start(); // Changed from _shootTimer
   }
 
   // Health bar rendering moved to BattleGame class to display full-width at top of screen
@@ -61,11 +61,11 @@ class Enemy extends SpriteAnimationComponent
   @override
   void update(double dt) {
     super.update(dt);
-    _shootTimer.update(dt);
+    shootTimer.update(dt); // Changed from _shootTimer
 
     // Check for enrage at 50% health
-    if (!_isEnraged && health <= maxHealth / 2 && health > 0) {
-      _triggerEnrage();
+    if (!isEnraged && health <= maxHealth / 2 && health > 0) { // Changed from _isEnraged
+      triggerEnrage(); // Changed from _triggerEnrage
     }
 
     position.x += speed * direction * dt;
@@ -77,16 +77,16 @@ class Enemy extends SpriteAnimationComponent
     position.x = position.x.clamp(size.x / 2, game.size.x - size.x / 2);
   }
 
-  void _triggerEnrage() {
-    _isEnraged = true;
+  void triggerEnrage() { // Changed from _triggerEnrage
+    isEnraged = true; // Changed from _isEnraged
 
     // Double speed
     speed = speed * 2;
 
     // Double fire rate by halving timer interval
-    _shootTimer.stop();
-    _shootTimer = Timer(0.75, onTick: shoot, repeat: true); // 1.5s -> 0.75s
-    _shootTimer.start();
+    shootTimer.stop(); // Changed from _shootTimer
+    shootTimer = Timer(0.75, onTick: shoot, repeat: true); // 1.5s -> 0.75s
+    shootTimer.start(); // Changed from _shootTimer
 
     print('🔥 BOSS ENRAGED! Speed and fire rate DOUBLED! 🔥');
   }

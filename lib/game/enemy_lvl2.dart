@@ -14,14 +14,14 @@ class EnemyLevel2 extends Enemy {
     // Override animation with Level 2 sprite sheet
     final spriteSheet = await game.images.load('Enemy_lvl2_sprite.png');
     final spriteSize = Vector2(
-      spriteSheet.width / 3,
+      spriteSheet.width / 5,
       spriteSheet.height.toDouble(),
     );
 
     animation = SpriteAnimation.fromFrameData(
       spriteSheet,
       SpriteAnimationData.sequenced(
-        amount: 3,
+        amount: 5,
         stepTime: 0.2,
         textureSize: spriteSize,
       ),

@@ -1,4 +1,5 @@
-import 'package:bvst/game/enemy.dart';
+import 'package:bvst/game/enemy.dart'; // Restore Enemy import
+import 'package:bvst/game/enemy_lvl1.dart'; // Import EnemyLevel1
 import 'package:bvst/game/player.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
@@ -18,7 +19,7 @@ class BattleGame extends FlameGame with HasCollisionDetection {
     await super.onLoad();
 
     player = Player();
-    enemy = Enemy();
+    enemy = EnemyLevel1(); // Use EnemyLevel1
 
     add(player);
     add(enemy);
