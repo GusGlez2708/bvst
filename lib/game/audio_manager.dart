@@ -84,6 +84,7 @@ class AudioManager {
       'musica_lvl4.mp3', // Level 4 background music
       'poder_lvl4.mp3', // Level 4 weakening power
       'debilidad_lvl4.mp3', // Level 4 weakness loop
+      'grito.mp3',
     ]);
   }
 

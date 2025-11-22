@@ -85,6 +85,7 @@ class _GameScreenLevel4State extends State<GameScreenLevel4> with WidgetsBinding
           _isCountingDown = false;
           _game.player.startBehavior();
           _game.enemy.startBehavior();
+          _game.startSequence(); // Start the level sequence
         });
       }
     });
@@ -193,17 +194,7 @@ class _GameScreenLevel4State extends State<GameScreenLevel4> with WidgetsBinding
                 game: _game,
                 backgroundBuilder: (context) {
                   return Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage(
-                          'assets/images/fondo_lvl4.png',
-                        ), // Level 4 Background
-                        fit: BoxFit.fill,
-                        filterQuality: FilterQuality.high,
-                      ),
-                    ),
+                    color: Colors.black,
                   );
                 },
               ),

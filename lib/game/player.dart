@@ -19,6 +19,7 @@ class Player extends SpriteComponent
   bool _isShooting = false;
   double speed = 0.0; // Made public for level mechanics
   double damageMultiplier = 1.0; // Made public for level mechanics (e.g., weakening)
+  bool canMove = true; // New property for Level 4 mechanics
 
   // --- Timers ---
   late Timer _shootCooldown;
@@ -150,11 +151,13 @@ class Player extends SpriteComponent
   // --- Métodos de control ---
 
   void moveLeft() {
+    if (!canMove) return;
     _direction = PlayerDirection.left;
     _updateSprite();
   }
 
   void moveRight() {
+    if (!canMove) return;
     _direction = PlayerDirection.right;
     _updateSprite();
   }
@@ -165,6 +168,12 @@ class Player extends SpriteComponent
   }
 
   void shoot() async {
+    if (!canMove && _direction == PlayerDirection.none) {
+       // Allow shooting if immobile? User said "personaje se quedara inmóvil" then "lo podremos atacar".
+       // I'll assume shooting is allowed even if movement isn't, OR I'll re-enable movement for the attack phase.
+       // In BattleGameLevel4 I re-enable canMove for the vulnerable phase, so this check is fine.
+    }
+    
     if (_canShoot) {
       _isShooting = true;
       _updateSprite(); // Cambia al sprite de disparo
@@ -188,6 +197,28 @@ class Player extends SpriteComponent
       _canShoot = false;
       _shootCooldown.start();
     }
+  }
+  
+  void takeDamage(int amount) {
+      if (_isInvincible) return;
+
+      AudioManager().playGameSfx('damage_prota.mp3');
+      
+      // Apply damage multiplier (e.g., 2.0 when weakened, 1.0 normally)
+      final damageAmount = (amount * damageMultiplier).round();
+      health -= damageAmount;
+      
+      _isFlashing = true;
+      _isInvincible = true;
+      _flashElapsed = 0.0;
+
+      final particle = CollisionParticle(
+        position: position.clone(),
+        color: const Color(0xFF00FF00),
+      );
+      game.add(particle);
+
+      game.checkWinCondition();
   }
 
   @override
