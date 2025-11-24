@@ -10,7 +10,7 @@ import 'package:bvst/game/game_state.dart';
 class Enemy extends SpriteAnimationComponent
     with HasGameReference<BattleGame>, CollisionCallbacks {
   int health = 1;
-  late int maxHealth;
+  int maxHealth = 1;
   double speed = 0.0;
   int direction = 1;
   Timer shootTimer; // Changed from _shootTimer
@@ -23,7 +23,7 @@ class Enemy extends SpriteAnimationComponent
   Future<void> onLoad() async {
     await super.onLoad();
     // Load static sprite as a 1-frame animation
-    final sprite = await Sprite.load('enemigo.png');
+    final sprite = await Sprite.load('enemigo_lvl1.png');
     final spriteSize = sprite.srcSize;
 
     animation = SpriteAnimation.spriteList([sprite], stepTime: 1.0);

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/game/battle_game_lvl4.dart';
+import 'package:bvst/game/dialogue_system.dart';
 import 'package:bvst/screens/pause_menu.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +19,12 @@ class GameScreenLevel4 extends StatefulWidget {
 class _GameScreenLevel4State extends State<GameScreenLevel4> with WidgetsBindingObserver {
   int _countdown = 1;
   Timer? _timer;
-  bool _isCountingDown = true;
+  bool _isCountingDown = false; 
   late final BattleGameLevel4 _game;
   bool _isPaused = false;
+  bool _isInDialogue = false;
+  List<DialogueLine>? _currentDialogueLines;
+  VoidCallback? _currentDialogueOnFinished;
 
   @override
   void initState() {
@@ -34,25 +38,61 @@ class _GameScreenLevel4State extends State<GameScreenLevel4> with WidgetsBinding
           AudioManager().stopGameBgm();
 
           if (hasWon) {
-            AudioManager().playUiSfx('victory.mp3');
+            _showOutroDialogue();
           } else {
             AudioManager().playUiSfx('defeat.mp3');
+            Navigator.pushReplacementNamed(
+              context,
+              '/result',
+              arguments: {'hasWon': hasWon, 'currentLevel': 4},
+            );
           }
-
-          Navigator.pushReplacementNamed(
-            context,
-            '/result',
-            arguments: {'hasWon': hasWon, 'currentLevel': 4},
-          );
         }
       },
     );
+    
+    // Initialize dialogue state directly
+    _isInDialogue = true;
+    _currentDialogueLines = DialogueData.getIntroForLevel(4);
+    _currentDialogueOnFinished = _onIntroDialogueFinished;
+    
+    AdService().loadBanner();
+  }
+
+  void _showOutroDialogue() {
+    setState(() {
+      _isInDialogue = true;
+      _currentDialogueLines = DialogueData.getOutroForLevel(4);
+      _currentDialogueOnFinished = _onOutroDialogueFinished;
+    });
+  }
+
+  void _onIntroDialogueFinished() {
+    setState(() {
+      _isInDialogue = false;
+      _currentDialogueLines = null;
+      _currentDialogueOnFinished = null;
+      _isCountingDown = true; 
+    });
     _startCountdown();
     Future.delayed(const Duration(milliseconds: 100), () {
       AudioManager().playUiSfx('contador.mp3');
     });
-    // AudioManager().playGameBgm('musica_lvl4.mp3'); // <-- Moved to after countdown
-    AdService().loadBanner();
+  }
+
+  void _onOutroDialogueFinished() {
+    setState(() {
+      _isInDialogue = false;
+      _currentDialogueLines = null;
+      _currentDialogueOnFinished = null;
+    });
+    
+    AudioManager().playUiSfx('victory.mp3');
+    Navigator.pushReplacementNamed(
+      context,
+      '/result',
+      arguments: {'hasWon': true, 'currentLevel': 4},
+    );
   }
 
   @override
@@ -65,7 +105,7 @@ class _GameScreenLevel4State extends State<GameScreenLevel4> with WidgetsBinding
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      if (!_isPaused && !_isCountingDown) {
+      if (!_isPaused && !_isCountingDown && !_isInDialogue) {
         _pauseGame();
       }
     }
@@ -83,7 +123,7 @@ class _GameScreenLevel4State extends State<GameScreenLevel4> with WidgetsBinding
         });
       } else {
         _timer?.cancel();
-        AudioManager().playGameBgm('musica_lvl4.mp3'); // <-- Start Level 4 BGM here
+        AudioManager().playGameBgm('musica_lvl4.mp3'); 
         setState(() {
           _isCountingDown = false;
           _game.player.startBehavior();
@@ -179,7 +219,7 @@ class _GameScreenLevel4State extends State<GameScreenLevel4> with WidgetsBinding
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        if (!_isPaused && !_isCountingDown) {
+        if (!_isPaused && !_isCountingDown && !_isInDialogue) {
           _pauseGame();
         }
       },
@@ -220,7 +260,7 @@ class _GameScreenLevel4State extends State<GameScreenLevel4> with WidgetsBinding
                     ),
                   ),
                 ),
-              if (!_isCountingDown && !_isPaused) ...[
+              if (!_isCountingDown && !_isPaused && !_isInDialogue) ...[
                 Positioned(
                   bottom: 30,
                   left: 30,
@@ -247,6 +287,11 @@ class _GameScreenLevel4State extends State<GameScreenLevel4> with WidgetsBinding
                   ),
                 ),
               ],
+              if (_isInDialogue && _currentDialogueLines != null && _currentDialogueOnFinished != null)
+                DialogueOverlay(
+                  lines: _currentDialogueLines!,
+                  onFinished: _currentDialogueOnFinished!,
+                ),
               if (_isPaused)
                 PauseMenu(
                   onResume: _resumeGame,

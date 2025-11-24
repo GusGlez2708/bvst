@@ -12,7 +12,7 @@ enum PlayerDirection { none, left, right }
 class Player extends SpriteComponent
     with HasGameReference<BattleGame>, CollisionCallbacks {
   int health = 3;
-  late int maxHealth;
+  int maxHealth = 3;
 
   // --- State Management ---
   PlayerDirection _direction = PlayerDirection.none;

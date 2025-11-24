@@ -33,7 +33,7 @@ class EnemyLevel4 extends Enemy {
     // But since we are overriding render/update, it might be fine.
     // However, SpriteAnimationComponent needs an animation.
     // Let's just load a 1x1 transparent pixel or similar, or just use the default and hide it.
-    final sprite = await Sprite.load('enemigo.png'); // Load anything
+    final sprite = await Sprite.load('enemigo_lvl4.png'); // Load anything
     animation = SpriteAnimation.spriteList([sprite], stepTime: 1.0);
     paint.color = const Color(0x00000000); // Transparent
 
