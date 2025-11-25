@@ -6,10 +6,20 @@ import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/game/battle_game.dart';
 import 'package:bvst/game/enemy_lvl5.dart';
 import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
 
 class BattleGameLevel5 extends BattleGame {
   late EnemyLevel5 _boss;
   late SpriteComponent _background;
+  final List<RainDrop> _rainDrops = [];
+  final Random _random = Random();
+  
+  // Thunder effect
+  late RectangleComponent _thunderFlash;
+  double _thunderTimer = 0;
+  double _thunderCooldown = 3.0; // Thunder every 3 seconds
+  bool _thunderActive = false;
+  double _flashDuration = 0;
   
   Timer? _powerTimer;
   Timer? _attackTimer;
@@ -27,13 +37,35 @@ class BattleGameLevel5 extends BattleGame {
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Setup Background
+    // Setup static Background
     _background = SpriteComponent()
       ..sprite = await loadSprite('fondo_lvl5.png')
       ..size = size
       ..position = Vector2.zero()
-      ..priority = -10; // Ensure it's behind everything
+      ..priority = -10;
     add(_background);
+
+    // Create thunder flash overlay (initially invisible)
+    _thunderFlash = RectangleComponent(
+      size: size,
+      position: Vector2.zero(),
+      paint: Paint()..color = Colors.white.withOpacity(0),
+      priority: 100, // On top of everything
+    );
+    add(_thunderFlash);
+
+    // Create rain drops
+    for (int i = 0; i < 50; i++) {
+      final rainDrop = RainDrop(
+        position: Vector2(
+          _random.nextDouble() * size.x,
+          _random.nextDouble() * size.y,
+        ),
+        screenSize: size,
+      );
+      _rainDrops.add(rainDrop);
+      add(rainDrop);
+    }
 
     // Remove default enemy and add Level 5 Boss
     remove(enemy);
@@ -61,6 +93,7 @@ class BattleGameLevel5 extends BattleGame {
     // Stop boss movement and center it
     _boss.stopMovement();
     _boss.centerPosition();
+    _boss.makeInvulnerable(); // Make boss invulnerable during power
 
     // Store player's normal speed
     if (_normalPlayerSpeed == 0.0) {
@@ -118,6 +151,7 @@ class BattleGameLevel5 extends BattleGame {
 
     // Resume boss movement
     _boss.resumeMovement();
+    _boss.makeVulnerable(); // Make boss vulnerable again
 
     // Restore player's normal speed
     player.speed = _normalPlayerSpeed;
@@ -142,13 +176,78 @@ class BattleGameLevel5 extends BattleGame {
     super.update(dt);
     _powerTimer?.update(dt);
     _attackTimer?.update(dt);
+    
+    // Update thunder effect
+    _thunderTimer += dt;
+    if (_thunderTimer >= _thunderCooldown && !_thunderActive) {
+      // Trigger thunder flash
+      _thunderActive = true;
+      _flashDuration = 0;
+      _thunderTimer = 0;
+      _thunderCooldown = 2.5 + _random.nextDouble() * 2.5; // Random 2.5-5s
+    }
+    
+    if (_thunderActive) {
+      _flashDuration += dt;
+      if (_flashDuration < 0.1) {
+        // Quick bright flash
+        _thunderFlash.paint.color = Colors.white.withOpacity(0.4);
+      } else if (_flashDuration < 0.15) {
+        // Fade out
+        _thunderFlash.paint.color = Colors.white.withOpacity(0.2);
+      } else {
+        // End flash
+        _thunderFlash.paint.color = Colors.white.withOpacity(0);
+        _thunderActive = false;
+      }
+    }
   }
-
+  
   @override
   void onRemove() {
     _powerTimer?.stop();
     _attackTimer?.stop();
     _powerAudioPlayer?.dispose();
     super.onRemove();
+  }
+}
+
+// Rain drop component
+class RainDrop extends PositionComponent {
+  final Vector2 screenSize;
+  final Random _random = Random();
+  late double speed;
+  late Paint _paint;
+
+  RainDrop({required Vector2 position, required this.screenSize})
+      : super(position: position, size: Vector2(2, 15)) {
+    speed = 300 + _random.nextDouble() * 200; // Random speed 300-500
+    _paint = Paint()
+      ..color = Colors.white.withOpacity(0.3)
+      ..strokeWidth = 1.5;
+    priority = -5; // Between background and game objects
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    position.y += speed * dt;
+    
+    // Reset to top when off screen
+    if (position.y > screenSize.y) {
+      position.y = -size.y;
+      position.x = _random.nextDouble() * screenSize.x;
+    }
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    // Draw rain as a line
+    canvas.drawLine(
+      Offset(0, 0),
+      Offset(0, size.y),
+      _paint,
+    );
   }
 }

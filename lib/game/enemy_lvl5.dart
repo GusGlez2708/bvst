@@ -7,6 +7,7 @@ import 'package:flame/collisions.dart';
 class EnemyLevel5 extends Enemy {
   bool _canMove = false; // Start as false, only move after startBehavior()
   bool _hasShotThisCycle = false;
+  bool isInvulnerable = false; // Invulnerable during power
 
   EnemyLevel5() : super();
 
@@ -115,6 +116,26 @@ class EnemyLevel5 extends Enemy {
     game.add(bullet);
   }
 
+  @override
+  void onCollisionStart(
+    Set<Vector2> intersectionPoints,
+    PositionComponent other,
+  ) {
+    // Check if invulnerable during power
+    if (other is Bullet && other.isPlayerBullet) {
+      if (isInvulnerable) {
+        // Invulnerable - just remove bullet without damage
+        other.removeFromParent();
+        // Optional: play a "shield" or "deflect" sound
+        AudioManager().playGameSfx('FireUnder.mp3'); // Placeholder sound
+        return;
+      } else {
+        // Vulnerable - take damage normally
+        super.onCollisionStart(intersectionPoints, other);
+      }
+    }
+  }
+
   // Methods to control movement during power
   void stopMovement() {
     _canMove = false;
@@ -127,5 +148,14 @@ class EnemyLevel5 extends Enemy {
   void centerPosition() {
     position.x = game.size.x / 2;
     scale.x = 1; // Face forward
+  }
+
+  // Methods to control invulnerability during power
+  void makeInvulnerable() {
+    isInvulnerable = true;
+  }
+
+  void makeVulnerable() {
+    isInvulnerable = false;
   }
 }
