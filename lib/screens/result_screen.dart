@@ -50,15 +50,11 @@ class _ResultScreenState extends State<ResultScreen>
         final progressService = ProgressService();
         int nextLevelToSave = currentLevel + 1;
         
-        // If completed level 4, reset to level 1
-        if (currentLevel >= 4) {
+        // If completed level 5 (final), reset to level 1
+        if (currentLevel >= 5) {
           nextLevelToSave = 1;
         }
         
-        // Only save if the new level is higher than what's currently saved?
-        // Actually, user wants strict progression: "si gano el nivel 1 ... me llevara al nivel 2"
-        // "si pasa todos los niveles ... se reinicia ... empieza desde el nivel 1"
-        // So we just overwrite the saved level with the next one.
         await progressService.saveLevel(nextLevelToSave);
       }
       
@@ -97,8 +93,10 @@ class _ResultScreenState extends State<ResultScreen>
       nextLevel = 3;
     } else if (currentLevel == 3) {
       nextLevel = 4;
+    } else if (currentLevel == 4) {
+      nextLevel = 5; // Added Level 5
     } else {
-      nextLevel = null; // No more levels after level 4
+      nextLevel = null; // No more levels after level 5
     }
 
     // --- LÓGICA DE COLOR CONDICIONAL ---

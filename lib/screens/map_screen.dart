@@ -59,22 +59,56 @@ class MapScreen extends StatelessWidget {
             ),
           ),
 
-          // --- 4. BOTÓN NIVEL 2 (EL NUEVO DESBLOQUEADO) ---
-          // Ajusta 'top' y 'left' según donde esté la segunda isla
+          // --- 4. BOTÓN NIVEL 2 ---
           Positioned(
             top: size.height * 0.5, // 50% desde arriba
             right: size.width * 0.25, // 25% desde la derecha
             child: _buildLevelMarker(
               context,
               level: 2,
-              isLocked:
-                  false, // Asumimos que ya ganaste el 1, así que este está abierto
+              isLocked: false,
               label: "NIVEL 2",
-              isPulse: true, // Efecto visual para indicar que es el siguiente
             ),
           ),
 
-          // --- 5. BOTÓN VOLVER AL MENÚ ---
+          // --- 5. BOTÓN NIVEL 3 ---
+          Positioned(
+            top: size.height * 0.35, // 35% desde arriba
+            left: size.width * 0.45, // 45% desde la izquierda (centro)
+            child: _buildLevelMarker(
+              context,
+              level: 3,
+              isLocked: false,
+              label: "NIVEL 3",
+            ),
+          ),
+
+          // --- 6. BOTÓN NIVEL 4 ---
+          Positioned(
+            top: size.height * 0.6, // 60% desde arriba
+            left: size.width * 0.15, // 15% desde la izquierda
+            child: _buildLevelMarker(
+              context,
+              level: 4,
+              isLocked: false,
+              label: "NIVEL 4",
+            ),
+          ),
+
+          // --- 7. BOTÓN NIVEL 5 (FINAL) ---
+          Positioned(
+            top: size.height * 0.25, // 25% desde arriba (parte superior)
+            right: size.width * 0.15, // 15% desde la derecha
+            child: _buildLevelMarker(
+              context,
+              level: 5,
+              isLocked: false,
+              label: "NIVEL 5 - FINAL",
+              isPulse: true, // Efecto visual para el nivel final
+            ),
+          ),
+
+          // --- 8. BOTÓN VOLVER AL MENÚ ---
           Positioned(
             top: 40,
             left: 20,
@@ -104,14 +138,14 @@ class MapScreen extends StatelessWidget {
               ? null
               : () {
                   AudioManager().playUiSfx('start.mp3');
-                  // Navegar al juego pasando el argumento del nivel
-                  Navigator.pushNamed(
-                    context,
-                    '/game',
-                    arguments: {
-                      'level': level,
-                    }, // Pasamos el nivel seleccionado
-                  );
+                  // Navegar al juego según el nivel específico
+                  String route = '/game';
+                  if (level == 2) route = '/game_lvl2';
+                  if (level == 3) route = '/game_lvl3';
+                  if (level == 4) route = '/game_lvl4';
+                  if (level == 5) route = '/game_lvl5';
+                  
+                  Navigator.pushNamed(context, route);
                 },
           child: Container(
             width: 60,

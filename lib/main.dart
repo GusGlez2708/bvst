@@ -8,14 +8,15 @@ import 'package:flutter/services.dart';
 
 import 'package:bvst/screens/options_screen.dart';
 // Importamos la nueva pantalla
-import 'package:bvst/screens/login_screen.dart'; // <-- NUEVO
+import 'package:bvst/screens/login_screen.dart'; // <- NUEVO
 import 'package:bvst/screens/level_selection_screen.dart';
 import 'package:bvst/screens/game_screen_lvl2.dart';
-import 'package:bvst/screens/game_screen_lvl3.dart'; // <-- NUEVO NIVEL 3
-import 'package:bvst/screens/game_screen_lvl4.dart'; // <-- NUEVO NIVEL 4
-import 'package:bvst/screens/shop_screen.dart'; // <-- NUEVO
-import 'package:supabase_flutter/supabase_flutter.dart'; // <-- NUEVO
-import 'package:bvst/services/ad_service.dart'; // <-- NUEVO
+import 'package:bvst/screens/game_screen_lvl3.dart'; // <- NUEVO NIVEL 3
+import 'package:bvst/screens/game_screen_lvl4.dart'; // <- NUEVO NIVEL 4
+import 'package:bvst/screens/game_screen_lvl5.dart'; // <- NUEVO NIVEL 5
+import 'package:bvst/screens/shop_screen.dart'; // <- NUEVO
+import 'package:supabase_flutter/supabase_flutter.dart'; // <- NUEVO
+import 'package:bvst/services/ad_service.dart'; // <- NUEVO
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +30,7 @@ void main() async {
   // ------------------------
 
   await AudioManager().preloadAllAudio();
-  await AdService().initialize(); // <-- NUEVO
+  await AdService().initialize(); // <- NUEVO
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
@@ -48,18 +49,19 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Echoes of Viridis',
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: '/login', // <-- CAMBIADO DE '/menu' a '/login'
+      initialRoute: '/login', // <- CAMBIADO DE '/menu' a '/login'
       routes: {
-        '/login': (context) => const LoginScreen(), // <-- NUEVA RUTA
+        '/login': (context) => const LoginScreen(), // <- NUEVA RUTA
         '/menu': (context) => const MenuScreen(),
-        '/shop': (context) => const ShopScreen(), // <-- NUEVA RUTA TIENDA
+        '/shop': (context) => const ShopScreen(), // <- NUEVA RUTA TIENDA
         '/game': (context) => const GameScreen(),
         '/result': (context) => const ResultScreen(),
         '/options': (context) => const OptionsScreen(),
         '/level_selection': (context) => const LevelSelectionScreen(),
         '/game_lvl2': (context) => const GameScreenLevel2(),
-        '/game_lvl3': (context) => const GameScreenLevel3(), // <-- NUEVA RUTA NIVEL 3
-        '/game_lvl4': (context) => const GameScreenLevel4(), // <-- NUEVA RUTA NIVEL 4
+        '/game_lvl3': (context) => const GameScreenLevel3(), // <- NUEVA RUTA NIVEL 3
+        '/game_lvl4': (context) => const GameScreenLevel4(), // <- NUEVA RUTA NIVEL 4
+        '/game_lvl5': (context) => const GameScreenLevel5(), // <- NUEVA RUTA NIVEL 5
       },
     );
   }
