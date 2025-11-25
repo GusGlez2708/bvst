@@ -75,6 +75,7 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
                     if (savedLevel == 2) route = '/game_lvl2';
                     if (savedLevel == 3) route = '/game_lvl3';
                     if (savedLevel == 4) route = '/game_lvl4';
+                    if (savedLevel == 5) route = '/game_lvl5';
                     
                     if (context.mounted) {
                       Navigator.pushNamed(context, route);

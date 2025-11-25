@@ -1,0 +1,360 @@
+import 'dart:async';
+import 'package:bvst/game/audio_manager.dart';
+import 'package:bvst/game/battle_game_lvl5.dart';
+import 'package:bvst/game/dialogue_system.dart';
+import 'package:bvst/screens/pause_menu.dart';
+import 'package:flame/game.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:bvst/services/ad_service.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+class GameScreenLevel5 extends StatefulWidget {
+  const GameScreenLevel5({super.key});
+
+  @override
+  State<GameScreenLevel5> createState() => _GameScreenLevel5State();
+}
+
+class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBindingObserver {
+  int _countdown = 1;
+  Timer? _timer;
+  bool _isCountingDown = false; 
+  late final BattleGameLevel5 _game;
+  bool _isPaused = false;
+  bool _isInDialogue = false;
+  List<DialogueLine>? _currentDialogueLines;
+  VoidCallback? _currentDialogueOnFinished;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _game = BattleGameLevel5(
+      onGameOver: (hasWon) {
+        if (mounted) {
+          _game.pauseEngine();
+          AudioManager().stopAllPooledSfx();
+          AudioManager().stopGameBgm();
+
+          if (hasWon) {
+            _showOutroDialogue();
+          } else {
+            AudioManager().playUiSfx('defeat.mp3');
+            Navigator.pushReplacementNamed(
+              context,
+              '/result',
+              arguments: {'hasWon': hasWon, 'currentLevel': 5},
+            );
+          }
+        }
+      },
+    );
+    
+    // Initialize dialogue state directly
+    _isInDialogue = true;
+    _currentDialogueLines = DialogueData.getIntroForLevel(5);
+    _currentDialogueOnFinished = _onIntroDialogueFinished;
+    
+    AdService().loadBanner();
+  }
+
+  void _showOutroDialogue() {
+    setState(() {
+      _isInDialogue = true;
+      _currentDialogueLines = DialogueData.getOutroForLevel(5);
+      _currentDialogueOnFinished = _onOutroDialogueFinished;
+    });
+  }
+
+  void _onIntroDialogueFinished() {
+    setState(() {
+      _isInDialogue = false;
+      _currentDialogueLines = null;
+      _currentDialogueOnFinished = null;
+      _isCountingDown = true; 
+    });
+    _startCountdown();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      AudioManager().playUiSfx('contador.mp3');
+    });
+  }
+
+  void _onOutroDialogueFinished() {
+    setState(() {
+      _isInDialogue = false;
+      _currentDialogueLines = null;
+      _currentDialogueOnFinished = null;
+    });
+    
+    AudioManager().playUiSfx('victory.mp3');
+    Navigator.pushReplacementNamed(
+      context,
+      '/result',
+      arguments: {'hasWon': true, 'currentLevel': 5},
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      if (!_isPaused && !_isCountingDown && !_isInDialogue) {
+        _pauseGame();
+      }
+    }
+  }
+
+  void _startCountdown() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_countdown < 3) {
+        setState(() {
+          _countdown++;
+        });
+      } else if (_countdown == 3) {
+        setState(() {
+          _countdown++;
+        });
+      } else {
+        _timer?.cancel();
+        AudioManager().playGameBgm('musica_lvl5.mp3'); 
+        setState(() {
+          _isCountingDown = false;
+          _game.player.startBehavior();
+          _game.enemy.startBehavior();
+          _game.startSequence();
+        });
+      }
+    });
+  }
+
+  void _pauseGame() {
+    setState(() {
+      _isPaused = true;
+    });
+    _game.pauseEngine();
+    AudioManager().pauseGameBgm();
+  }
+
+  void _resumeGame() {
+    setState(() {
+      _isPaused = false;
+    });
+    _game.resumeEngine();
+    AudioManager().resumeGameBgm();
+  }
+
+  Widget _buildMovementJoystick() {
+    return GestureDetector(
+      onPanUpdate: (details) {
+        // Check if controls are inverted and swap the movement
+        if (_game.controlsInverted) {
+          // Inverted: right becomes left, left becomes right
+          if (details.delta.dx > 1.0) {
+            _game.player.moveLeft(); // User swipes right, player moves left
+          } else if (details.delta.dx < -1.0) {
+            _game.player.moveRight(); // User swipes left, player moves right
+          }
+        } else {
+          // Normal controls
+          if (details.delta.dx > 1.0) {
+            _game.player.moveRight();
+          } else if (details.delta.dx < -1.0) {
+            _game.player.moveLeft();
+          }
+        }
+      },
+      onPanEnd: (details) {
+        _game.player.stopMoving();
+      },
+      onPanCancel: () {
+        _game.player.stopMoving();
+      },
+      child: Container(
+        width: 140,
+        height: 70,
+        decoration: BoxDecoration(
+          color: _game.controlsInverted 
+              ? const Color(0xFFFF4444).withOpacity(0.3) // Red when inverted
+              : const Color(0xFF2196F3).withOpacity(0.3), // Blue when normal
+          borderRadius: BorderRadius.circular(35),
+          border: Border.all(
+            color: _game.controlsInverted 
+                ? Colors.red.withOpacity(0.8) 
+                : Colors.white.withOpacity(0.5), 
+            width: 2
+          ),
+        ),
+        child: Center(
+          child: Icon(
+            _game.controlsInverted ? Icons.swap_horiz_outlined : Icons.swap_horiz,
+            color: _game.controlsInverted ? Colors.red : Colors.white,
+            size: 40,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAttractiveShootButton() {
+    return GestureDetector(
+      onTap: _game.player.shoot,
+      child: Container(
+        width: 70,
+        height: 70,
+        decoration: BoxDecoration(
+          color: const Color(0xFFFF9500).withOpacity(0.8),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white.withOpacity(0.8), width: 3),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFFF9500).withOpacity(0.5),
+              blurRadius: 10,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.arrow_upward,
+            color: Colors.white,
+            size: 40,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (!_isPaused && !_isCountingDown && !_isInDialogue) {
+          _pauseGame();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        resizeToAvoidBottomInset: false,
+        bottomNavigationBar: AdService().getBannerAd() != null
+            ? SizedBox(
+                height: AdService().getBannerAd()!.size.height.toDouble(),
+                width: AdService().getBannerAd()!.size.width.toDouble(),
+                child: AdWidget(ad: AdService().getBannerAd()!),
+              )
+            : null,
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Stack(
+            children: [
+              GameWidget(
+                game: _game,
+                backgroundBuilder: (context) {
+                  return Container(
+                    color: Colors.black,
+                  );
+                },
+              ),
+              if (_isCountingDown)
+                Container(
+                  color: Colors.black.withAlpha(150),
+                  child: Center(
+                    child: Text(
+                      _countdown > 3 ? 'GO' : _countdown.toString(),
+                      style: GoogleFonts.orbitron(
+                        fontSize: 100,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              if (!_isCountingDown && !_isPaused && !_isInDialogue) ...[
+                Positioned(
+                  bottom: 30,
+                  left: 30,
+                  right: 30,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _buildMovementJoystick(),
+                      _buildAttractiveShootButton(),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  top: 20,
+                  right: 20,
+                  child: GestureDetector(
+                    onTap: _pauseGame,
+                    child: Image.asset(
+                      'assets/images/pause.png',
+                      width: 50,
+                      height: 50,
+                    ),
+                  ),
+                ),
+                // Control inversion indicator
+                if (_game.controlsInverted)
+                  Positioned(
+                    top: 50,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF4444).withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
+                            const SizedBox(width: 8),
+                            Text(
+                              'CONTROLES INVERTIDOS',
+                              style: GoogleFonts.orbitron(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+              if (_isInDialogue && _currentDialogueLines != null && _currentDialogueOnFinished != null)
+                DialogueOverlay(
+                  lines: _currentDialogueLines!,
+                  onFinished: _currentDialogueOnFinished!,
+                ),
+              if (_isPaused)
+                PauseMenu(
+                  onResume: _resumeGame,
+                  onQuit: () {
+                    AudioManager().stopGameBgm();
+                    AudioManager().playMenuBgm();
+                    Navigator.of(context).pop();
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

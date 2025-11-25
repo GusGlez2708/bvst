@@ -48,10 +48,12 @@ class Bullet extends SpriteAnimationComponent
       final sprite = await Sprite.load(spritePath);
       animation = SpriteAnimation.spriteList([sprite], stepTime: 1.0);
 
-      // Make enemy projectiles bigger for levels 2 and 3
+      // Make enemy projectiles bigger for levels 2, 3, and 5
       double newHeight;
       if (spritePath == 'ataque_lvl3.png' && !isPlayerBullet) {
         newHeight = game.size.y * 0.08; // Larger for level 3 enemy projectiles
+      } else if (spritePath == 'ataque_lvl5.png' && !isPlayerBullet) {
+        newHeight = game.size.y * 0.12; // 3x larger for level 5 enemy projectiles
       } else {
         newHeight = game.size.y * 0.04; // Default size
       }

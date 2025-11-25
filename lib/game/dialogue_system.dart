@@ -268,234 +268,337 @@ class DialogueData {
   static final List<DialogueLine> level2Intro = [
     const DialogueLine(
       speaker: "Ira",
-      text: "¿Crees que puedes apagarme? ¡Soy el fuego que te mantiene vivo!",
+      text: "Por fin. El cobarde que dejó que todo ardiera.",
       portraitAsset: "assets/images/enemigo_lvl2.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "No eres vida, eres destrucción. Me quemas por dentro.",
+      text: "¿Cobarde? Acabo de destruir a mi propio miedo.",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
     const DialogueLine(
       speaker: "Ira",
-      text: "¡Te defiendo! Cuando te lastimaron, yo fui quien gritó. ¿Y así me pagas?",
+      text: "Y aun así sigues dudando. Yo recuerdo lo que hiciste después del desastre…",
       portraitAsset: "assets/images/enemigo_lvl2.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "Gritar no sanó nada. Solo alejó a quienes intentaron ayudar.",
+      text: "No lo recuerdo. Solo flashes de fuego y ecos de gritos.",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
     const DialogueLine(
       speaker: "Ira",
-      text: "¡Pues que se alejen! ¡Solo me necesitas a mí y a mi furia!",
+      text: "Golpeaste puertas, gritaste órdenes, culpaste a todos menos a ti. Me alimentaste hasta volverme un incendio imposible de apagar.",
       portraitAsset: "assets/images/enemigo_lvl2.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "Ya no quiero arder. Quiero paz.",
+      text: "Si de verdad soy responsable… entonces tengo que verte de frente.",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
+    ),
+    const DialogueLine(
+      speaker: "Ira",
+      text: "Perfecto. Déjame arder en ti una última vez.",
+      portraitAsset: "assets/images/enemigo_lvl2.png",
+      side: DialogueSide.enemy,
     ),
   ];
 
   static final List<DialogueLine> level2Outro = [
     const DialogueLine(
       speaker: "Ira",
-      text: "¡Aaaargh!… ¿Por qué… te calmas?… ¡Debes estar furioso!",
+      text: "Aun… puedes luchar sin destruirlo todo…",
       portraitAsset: "assets/images/enemigo_lvl2.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "Estoy cansado de estar enojado. Suelto esta carga.",
+      text: "La rabia me dio fuerza… pero también me hizo ciego.",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
     const DialogueLine(
       speaker: "Ira",
-      text: "Sin mí… serás débil… te pisotearán…",
+      text: "Recuerdas un poco más, ¿no? La discusión en el laboratorio, las advertencias que ignoraste…",
       portraitAsset: "assets/images/enemigo_lvl2.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "Seré más fuerte porque podré pensar con claridad.",
+      text: "Presioné para activar Viridis antes de tiempo… porque no soportaba ver morir a más gente.",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
     const DialogueLine(
       speaker: "Ira",
-      text: "El fuego… se apaga… pero las cenizas… quedan…",
+      text: "Y por eso nos condenaste aquí. Ve con Silencio… él sabe lo que callaste después.",
       portraitAsset: "assets/images/enemigo_lvl2.png",
       side: DialogueSide.enemy,
-    ),
-    const DialogueLine(
-      speaker: "Echo",
-      text: "De las cenizas nacerá algo nuevo. Adiós, Ira.",
-      portraitAsset: "assets/images/prota.png",
-      side: DialogueSide.hero,
     ),
   ];
 
-  // --- Level 3: Tristeza ---
+  // --- Level 3: Silencio ---
   static final List<DialogueLine> level3Intro = [
     const DialogueLine(
-      speaker: "Tristeza",
-      text: "¿Para qué luchar?… Todo termina igual… en silencio y olvido.",
+      speaker: "Silencio",
+      text: "… … …",
       portraitAsset: "assets/images/enemigo_lvl3.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "Lucho para recordar que aún hay luz, aunque tú la ocultes.",
+      text: "¿No vas a decir nada? Después de Miedo e Ira, hablar sería lo mínimo.",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
     const DialogueLine(
-      speaker: "Tristeza",
-      text: "Es tan pesado… levántate si puedes… pero es mejor quedarse aquí, en el suelo.",
+      speaker: "Silencio",
+      text: "…Tus palabras llegaron tarde. Tus decisiones también.",
       portraitAsset: "assets/images/enemigo_lvl3.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "Me he levantado antes. Y lo haré mil veces más.",
+      text: "¿Eres el eco de lo que no dije?",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
     const DialogueLine(
-      speaker: "Tristeza",
-      text: "Tus lágrimas son mías. Eres un mar de dolor… ahógate con nosotros.",
+      speaker: "Silencio",
+      text: "Eres tú mirando las alarmas, escuchando las advertencias… y decidiendo no contárselo a nadie. El sistema fallaba, y tú lo sabías.",
       portraitAsset: "assets/images/enemigo_lvl3.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "Nadaré hasta la orilla. No dejaré que me hundas.",
+      text: "Si lo hubiera dicho… ¿podría haber detenido el colapso?",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
+    ),
+    const DialogueLine(
+      speaker: "Silencio",
+      text: "…No lo sabrás si sigues callando. Rompe este silencio, Echo.",
+      portraitAsset: "assets/images/enemigo_lvl3.png",
+      side: DialogueSide.enemy,
     ),
   ];
 
   static final List<DialogueLine> level3Outro = [
     const DialogueLine(
-      speaker: "Tristeza",
-      text: "Sniff… te vas… me dejas sola otra vez…",
+      speaker: "Silencio",
+      text: "…Al fin… hablas.",
       portraitAsset: "assets/images/enemigo_lvl3.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "No te dejo sola. Te acepto, pero no dejaré que me controles.",
+      text: "Fallaba la contención de las conciencias… y yo lo oculté para poder activar Viridis.",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
     const DialogueLine(
-      speaker: "Tristeza",
-      text: "El mundo es gris… sin esperanza…",
+      speaker: "Silencio",
+      text: "Tenías miedo de perder tu proyecto… y a las personas que confiaron en ti.",
       portraitAsset: "assets/images/enemigo_lvl3.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "El mundo tiene colores que tú no me dejabas ver.",
+      text: "Guardé silencio y los encerré en un sistema inestable. Por eso las emociones se corrompieron…",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
     const DialogueLine(
-      speaker: "Tristeza",
-      text: "Quizás… descansar un poco… no esté mal…",
+      speaker: "Silencio",
+      text: "Queda alguien que lleva todo ese peso… Culpa te espera al fondo de Viridis.",
       portraitAsset: "assets/images/enemigo_lvl3.png",
       side: DialogueSide.enemy,
-    ),
-    const DialogueLine(
-      speaker: "Echo",
-      text: "Descansa. Yo seguiré caminando hacia el sol.",
-      portraitAsset: "assets/images/prota.png",
-      side: DialogueSide.hero,
     ),
   ];
 
-  // --- Level 4: Ansiedad ---
+  // --- Level 4: Culpa ---
   static final List<DialogueLine> level4Intro = [
     const DialogueLine(
-      speaker: "Ansiedad",
-      text: "¿Y si fallas? ¿Y si todos se ríen? ¡No estás listo! ¡Nunca lo estarás!",
+      speaker: "Culpa",
+      text: "Por fin llegas. Pensé que seguirías encontrando excusas para no mirar atrás.",
       portraitAsset: "assets/images/enemigo_lvl4.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "Basta. Esas voces no son reales. Son solo ruido.",
+      text: "Ya recuerdo demasiado como para huir. Eres el que no me deja dormir… incluso aquí dentro.",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
     const DialogueLine(
-      speaker: "Ansiedad",
-      text: "¡Cuidado! ¡Todo es peligroso! ¡El futuro es un abismo!",
+      speaker: "Culpa",
+      text: "Fuiste tú quien aprobó subir sus conciencias. Fuiste tú quien apretó el botón. Familias enteras confiaron en ti.",
       portraitAsset: "assets/images/enemigo_lvl4.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "El futuro no existe aún. Solo importa este momento.",
+      text: "Creí que Viridis los protegería…",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
     const DialogueLine(
-      speaker: "Ansiedad",
-      text: "¡No puedes respirar! ¡El aire se acaba! ¡Corre, huye, escóndete!",
+      speaker: "Culpa",
+      text: "Y los atrapaste en un infierno digital. Yo nací el día que viste los primeros errores y decidiste seguir adelante.",
       portraitAsset: "assets/images/enemigo_lvl4.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "Respiro profundo. Estoy aquí. Estoy a salvo. Y te enfrentaré.",
+      text: "Si tengo que cargar con eso… lo haré. Pero no voy a quedarme congelado.",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
+    ),
+    const DialogueLine(
+      speaker: "Culpa",
+      text: "Entonces demuéstralo. No con palabras, sino con lo que hagas después de vencerme.",
+      portraitAsset: "assets/images/enemigo_lvl4.png",
+      side: DialogueSide.enemy,
     ),
   ];
 
   static final List<DialogueLine> level4Outro = [
     const DialogueLine(
-      speaker: "Ansiedad",
-      text: "¡No, no, no! ¿Qué pasará ahora? ¡No hay plan! ¡Caos!",
+      speaker: "Culpa",
+      text: "No puedes borrarme… solo aceptarme.",
       portraitAsset: "assets/images/enemigo_lvl4.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "Pasará lo que tenga que pasar. Y lo afrontaré cuando llegue.",
+      text: "Lo sé. Lo que hice no se deshace. Pero puedo decidir qué hacer ahora con Viridis.",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
     const DialogueLine(
-      speaker: "Ansiedad",
-      text: "Pero… ¿y si…? ¿Y si…?",
+      speaker: "Culpa",
+      text: "Has reunido todos los fragmentos. Miedo, Ira, Silencio y yo… todos formamos parte de la misma persona.",
       portraitAsset: "assets/images/enemigo_lvl4.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "Y si todo sale bien. Y si soy feliz.",
+      text: "¿Y Conciencia?",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
     const DialogueLine(
-      speaker: "Ansiedad",
-      text: "El ruido… se calla… es… extraño…",
+      speaker: "Culpa",
+      text: "Conciencia es el juez… y el guardián de este mundo. Es la parte de ti que nunca olvidó nada.",
       portraitAsset: "assets/images/enemigo_lvl4.png",
       side: DialogueSide.enemy,
     ),
     const DialogueLine(
       speaker: "Echo",
-      text: "Es silencio. Es paz. Finalmente, soy libre.",
+      text: "Entonces es hora de enfrentarme conmigo mismo.",
+      portraitAsset: "assets/images/prota.png",
+      side: DialogueSide.hero,
+    ),
+  ];
+
+  // --- Level 5: Conciencia (JEFE FINAL) ---
+  static final List<DialogueLine> level5Intro = [
+    const DialogueLine(
+      speaker: "Conciencia",
+      text: "Llegaste más lejos de lo que esperaba, Echo.",
+      portraitAsset: "assets/images/enemigo_lvl5.png",
+      side: DialogueSide.enemy,
+    ),
+    const DialogueLine(
+      speaker: "Echo",
+      text: "Ya no necesito que me digan quién soy. Yo construí Viridis. Yo provoqué este encierro.",
+      portraitAsset: "assets/images/prota.png",
+      side: DialogueSide.hero,
+    ),
+    const DialogueLine(
+      speaker: "Conciencia",
+      text: "Y aun así sigues aquí, luchando dentro del mismo sistema que te condenó. ¿Sabes por qué?",
+      portraitAsset: "assets/images/enemigo_lvl5.png",
+      side: DialogueSide.enemy,
+    ),
+    const DialogueLine(
+      speaker: "Echo",
+      text: "Porque quiero reparar el daño. Si tengo que apagar Viridis, lo haré.",
+      portraitAsset: "assets/images/prota.png",
+      side: DialogueSide.hero,
+    ),
+    const DialogueLine(
+      speaker: "Conciencia",
+      text: "No es tan simple. Si destruyes este lugar, las conciencias atrapadas se perderán para siempre. Si lo estabilizas, vivirán en una mentira eterna.",
+      portraitAsset: "assets/images/enemigo_lvl5.png",
+      side: DialogueSide.enemy,
+    ),
+    const DialogueLine(
+      speaker: "Echo",
+      text: "Entonces, ¿qué eres exactamente? ¿Un enemigo… o la última oportunidad de decidir?",
+      portraitAsset: "assets/images/prota.png",
+      side: DialogueSide.hero,
+    ),
+    const DialogueLine(
+      speaker: "Conciencia",
+      text: "Soy la suma de tus elecciones. Para alcanzar una respuesta, primero tendrás que enfrentarte a mí… a ti mismo.",
+      portraitAsset: "assets/images/enemigo_lvl5.png",
+      side: DialogueSide.enemy,
+    ),
+    const DialogueLine(
+      speaker: "Echo",
+      text: "He peleado contra mis emociones. Puedo pelear contra mi conciencia también.",
+      portraitAsset: "assets/images/prota.png",
+      side: DialogueSide.hero,
+    ),
+    const DialogueLine(
+      speaker: "Conciencia",
+      text: "Muéstrame que aprendiste algo de cada uno de ellos.",
+      portraitAsset: "assets/images/enemigo_lvl5.png",
+      side: DialogueSide.enemy,
+    ),
+  ];
+
+  static final List<DialogueLine> level5Outro = [
+    const DialogueLine(
+      speaker: "Conciencia",
+      text: "Venciste… pero no desaparezco. La conciencia nunca se borra por completo.",
+      portraitAsset: "assets/images/enemigo_lvl5.png",
+      side: DialogueSide.enemy,
+    ),
+    const DialogueLine(
+      speaker: "Echo",
+      text: "No quiero borrarte. Quiero decidir con claridad, no desde el miedo o la culpa.",
+      portraitAsset: "assets/images/prota.png",
+      side: DialogueSide.hero,
+    ),
+    const DialogueLine(
+      speaker: "Conciencia",
+      text: "Entonces escucha: Viridis puede reescribirse. Puedes liberar las conciencias, pero será un salto al vacío… o puedes mantenerlas aquí, seguras pero encadenadas a un mundo falso.",
+      portraitAsset: "assets/images/enemigo_lvl5.png",
+      side: DialogueSide.enemy,
+    ),
+    const DialogueLine(
+      speaker: "Echo",
+      text: "Esta vez no voy a decidir solo por mí. Reescribiré el sistema… para darles una elección.",
+      portraitAsset: "assets/images/prota.png",
+      side: DialogueSide.hero,
+    ),
+    const DialogueLine(
+      speaker: "Conciencia",
+      text: "…Esa era la respuesta que necesitaba escuchar.",
+      portraitAsset: "assets/images/enemigo_lvl5.png",
+      side: DialogueSide.enemy,
+    ),
+    const DialogueLine(
+      speaker: "Echo",
+      text: "Echoes of Viridis… no son solo voces del pasado. Serán la decisión de lo que venga después.",
       portraitAsset: "assets/images/prota.png",
       side: DialogueSide.hero,
     ),
@@ -511,6 +614,8 @@ class DialogueData {
         return level3Intro;
       case 4:
         return level4Intro;
+      case 5:
+        return level5Intro;
       default:
         return level1Intro;
     }
@@ -526,6 +631,8 @@ class DialogueData {
         return level3Outro;
       case 4:
         return level4Outro;
+      case 5:
+        return level5Outro;
       default:
         return level1Outro;
     }

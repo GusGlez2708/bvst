@@ -28,6 +28,11 @@ class LevelSelectionScreen extends StatelessWidget {
         'title': 'NIVEL 4',
         'route': '/game_lvl4',
       },
+      5: {
+        'mapImage': 'Map_Lvl5.png',
+        'title': 'NIVEL 5 - FINAL',
+        'route': '/game_lvl5',
+      },
     };
 
     final config = levelConfig[level] ?? levelConfig[2]!;
