@@ -49,21 +49,62 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Echoes of Viridis',
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: '/login', // <- CAMBIADO DE '/menu' a '/login'
+      home: const AuthGate(), // Check session on startup
       routes: {
-        '/login': (context) => const LoginScreen(), // <- NUEVA RUTA
+        '/login': (context) => const LoginScreen(),
         '/menu': (context) => const MenuScreen(),
-        '/shop': (context) => const ShopScreen(), // <- NUEVA RUTA TIENDA
+        '/shop': (context) => const ShopScreen(),
         '/game': (context) => const GameScreen(),
         '/result': (context) => const ResultScreen(),
         '/options': (context) => const OptionsScreen(),
         '/level_selection': (context) => const LevelSelectionScreen(),
         '/game_lvl2': (context) => const GameScreenLevel2(),
-        '/game_lvl3': (context) => const GameScreenLevel3(), // <- NUEVA RUTA NIVEL 3
-        '/game_lvl4': (context) => const GameScreenLevel4(), // <- NUEVA RUTA NIVEL 4
-        '/game_lvl5': (context) => const GameScreenLevel5(), // <- NUEVA RUTA NIVEL 5
+        '/game_lvl3': (context) => const GameScreenLevel3(),
+        '/game_lvl4': (context) => const GameScreenLevel4(),
+        '/game_lvl5': (context) => const GameScreenLevel5(),
       },
     );
+  }
+}
+
+/// Widget that checks for existing session and routes accordingly
+class AuthGate extends StatefulWidget {
+  const AuthGate({super.key});
+
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
+
+  Future<void> _checkSession() async {
+    // Small delay to ensure Supabase is fully initialized
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    final session = Supabase.instance.client.auth.currentSession;
+
+    if (mounted) {
+      if (session != null) {
+        print('✓ Existing session found for user: ${session.user.email}');
+        // User is already authenticated, go to menu
+        Navigator.of(context).pushReplacementNamed('/menu');
+      } else {
+        print('✗ No session found, showing login');
+        // No session, show login
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Show loading screen while checking session
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }
 

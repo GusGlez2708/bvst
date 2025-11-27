@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});
@@ -19,7 +20,7 @@ class ShopScreen extends StatefulWidget {
 class _ShopScreenState extends State<ShopScreen> {
   final GameState _gameState = GameState();
   bool _isLoading = true;
-  
+
   // Animation
   int _currentBgIndex = 0;
   late Timer _animationTimer;
@@ -42,7 +43,7 @@ class _ShopScreenState extends State<ShopScreen> {
     _startAnimation();
     _loadBannerAd();
     // Initialize Stripe (Mock setup for demo)
-    // Stripe.publishableKey = "pk_test_..."; 
+    // Stripe.publishableKey = "pk_test_...";
   }
 
   @override
@@ -53,7 +54,9 @@ class _ShopScreenState extends State<ShopScreen> {
   }
 
   void _startAnimation() {
-    _animationTimer = Timer.periodic(const Duration(milliseconds: 333), (timer) {
+    _animationTimer = Timer.periodic(const Duration(milliseconds: 333), (
+      timer,
+    ) {
       setState(() {
         _currentBgIndex = (_currentBgIndex + 1) % _bgImages.length;
       });
@@ -101,7 +104,10 @@ class _ShopScreenState extends State<ShopScreen> {
       setState(() {}); // Refresh UI
       _showPurchaseDialog(true, '¡Compra exitosa!');
     } else {
-      _showPurchaseDialog(false, 'No tienes suficientes monedas o ya lo compraste.');
+      _showPurchaseDialog(
+        false,
+        'No tienes suficientes monedas o ya lo compraste.',
+      );
     }
   }
 
@@ -109,6 +115,20 @@ class _ShopScreenState extends State<ShopScreen> {
     AudioManager().playUiSfx('start.mp3');
 
     try {
+      // 0. Check authentication BEFORE processing payment
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) {
+        _showPurchaseDialog(
+          false,
+          'Debes estar autenticado para comprar monedas.',
+        );
+        print('❌ Payment blocked: User not authenticated');
+        return;
+      }
+
+      print('👤 User authenticated: ${user.email}');
+      print('💳 Starting payment for $amount coins (\$$priceMxn MXN)...');
+
       // 1. Mostrar loading
       showDialog(
         context: context,
@@ -119,8 +139,9 @@ class _ShopScreenState extends State<ShopScreen> {
       // 2. Petición al Backend para obtener el PaymentIntent
       // NOTA: Usa '10.0.2.2' para emulador Android, o tu IP local para dispositivo físico.
       // Cuando despliegues, cambia esto por la URL de Render.
-      const backendUrl = 'https://backend-stripe-fhvy.onrender.com/payment-sheet'; 
-      
+      const backendUrl =
+          'https://backend-stripe-fhvy.onrender.com/payment-sheet';
+
       final response = await http.post(
         Uri.parse(backendUrl),
         headers: {'Content-Type': 'application/json'},
@@ -153,24 +174,46 @@ class _ShopScreenState extends State<ShopScreen> {
       Navigator.pop(context); // Cerrar loading inicial
 
       // 4. Mostrar Payment Sheet
+      print('📱 Presenting payment sheet...');
       await Stripe.instance.presentPaymentSheet();
 
       // 5. Si llega aquí, el pago fue exitoso
-      await _gameState.addCoins(amount);
-      setState(() {});
-      _showPurchaseDialog(true, '¡Has comprado $amount monedas!');
+      print('✅ Payment successful! Adding coins to database...');
 
+      // Wrap addCoins in try-catch to handle sync errors
+      try {
+        await _gameState.addCoins(amount);
+        setState(() {});
+        print('🎉 Purchase complete: $amount coins added successfully');
+        _showPurchaseDialog(true, '¡Has comprado $amount monedas!');
+      } catch (coinError) {
+        // Payment went through but coin sync failed
+        print(
+          '⚠️ CRITICAL: Payment succeeded but coin sync failed: $coinError',
+        );
+        _showPurchaseDialog(
+          false,
+          'Pago exitoso pero hubo un error al sincronizar monedas. Contacta soporte.',
+        );
+      }
     } on StripeException catch (e) {
-      if (Navigator.canPop(context)) Navigator.pop(context); // Cerrar loading si sigue abierto
-      
+      if (Navigator.canPop(context))
+        Navigator.pop(context); // Cerrar loading si sigue abierto
+
       if (e.error.code == FailureCode.Canceled) {
         // El usuario canceló, no mostramos error feo
-        print('Pago cancelado por el usuario');
+        print('🚫 Payment canceled by user');
       } else {
-        _showPurchaseDialog(false, 'Error de Stripe: ${e.error.localizedMessage}');
+        print('❌ Stripe error: ${e.error.localizedMessage}');
+        _showPurchaseDialog(
+          false,
+          'Error de Stripe: ${e.error.localizedMessage}',
+        );
       }
     } catch (e) {
-      if (Navigator.canPop(context)) Navigator.pop(context); // Cerrar loading si sigue abierto
+      if (Navigator.canPop(context))
+        Navigator.pop(context); // Cerrar loading si sigue abierto
+      print('❌ Payment error: $e');
       _showPurchaseDialog(false, 'Error: $e');
     }
   }
@@ -189,17 +232,17 @@ class _ShopScreenState extends State<ShopScreen> {
         ),
         content: Text(
           message,
-          style: GoogleFonts.pressStart2p(
-            color: Colors.white,
-            fontSize: 12,
-          ),
+          style: GoogleFonts.pressStart2p(color: Colors.white, fontSize: 12),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
               'OK',
-              style: GoogleFonts.pressStart2p(color: Colors.amber, fontSize: 12),
+              style: GoogleFonts.pressStart2p(
+                color: Colors.amber,
+                fontSize: 12,
+              ),
             ),
           ),
         ],
@@ -252,7 +295,12 @@ class _ShopScreenState extends State<ShopScreen> {
                             style: GoogleFonts.pressStart2p(
                               color: Colors.cyanAccent,
                               fontSize: 20,
-                              shadows: [const Shadow(color: Colors.blue, blurRadius: 10)],
+                              shadows: [
+                                const Shadow(
+                                  color: Colors.blue,
+                                  blurRadius: 10,
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -262,12 +310,13 @@ class _ShopScreenState extends State<ShopScreen> {
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         sliver: SliverGrid(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.8,
-                            crossAxisSpacing: 20,
-                            mainAxisSpacing: 20,
-                          ),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                childAspectRatio: 0.8,
+                                crossAxisSpacing: 20,
+                                mainAxisSpacing: 20,
+                              ),
                           delegate: SliverChildListDelegate([
                             _buildShopItem(
                               title: 'DISPARO DOBLE',
@@ -314,7 +363,12 @@ class _ShopScreenState extends State<ShopScreen> {
                             style: GoogleFonts.pressStart2p(
                               color: Colors.amberAccent,
                               fontSize: 20,
-                              shadows: [const Shadow(color: Colors.orange, blurRadius: 10)],
+                              shadows: [
+                                const Shadow(
+                                  color: Colors.orange,
+                                  blurRadius: 10,
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -322,18 +376,23 @@ class _ShopScreenState extends State<ShopScreen> {
 
                       // Coin Shop Items
                       SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
                         sliver: SliverGrid(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3, // 3 items per row
-                            childAspectRatio: 0.6,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                          ),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3, // 3 items per row
+                                childAspectRatio: 0.6,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                              ),
                           delegate: SliverChildListDelegate([
                             _buildCoinShopItem(
                               amount: 400,
-                              priceMxn: 10.0, // Mínimo de Stripe para MXN es ~$10
+                              priceMxn:
+                                  10.0, // Mínimo de Stripe para MXN es ~$10
                               imagePath: 'assets/images/coin_bucket.png',
                               title: 'Cubo',
                             ),
@@ -352,7 +411,7 @@ class _ShopScreenState extends State<ShopScreen> {
                           ]),
                         ),
                       ),
-                      
+
                       // Bottom padding for Ad
                       const SliverToBoxAdapter(child: SizedBox(height: 80)),
                     ],
@@ -429,7 +488,11 @@ class _ShopScreenState extends State<ShopScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.monetization_on, color: Colors.amber, size: 24),
+                const Icon(
+                  Icons.monetization_on,
+                  color: Colors.amber,
+                  size: 24,
+                ),
                 const SizedBox(width: 10),
                 Text(
                   '${_gameState.coins}',
@@ -462,7 +525,9 @@ class _ShopScreenState extends State<ShopScreen> {
         color: Colors.black.withOpacity(0.8),
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
-          color: alreadyOwned ? Colors.green : (isLocked ? Colors.grey : Colors.cyan),
+          color: alreadyOwned
+              ? Colors.green
+              : (isLocked ? Colors.grey : Colors.cyan),
           width: 2,
         ),
         boxShadow: [
@@ -478,26 +543,28 @@ class _ShopScreenState extends State<ShopScreen> {
         children: [
           Icon(
             icon,
-            color: alreadyOwned ? Colors.green : (isLocked ? Colors.grey : Colors.white),
+            color: alreadyOwned
+                ? Colors.green
+                : (isLocked ? Colors.grey : Colors.white),
             size: 32,
           ),
           const SizedBox(height: 10),
           Text(
             title,
-            style: GoogleFonts.pressStart2p(
-              color: Colors.white,
-              fontSize: 10,
-            ),
+            style: GoogleFonts.pressStart2p(color: Colors.white, fontSize: 10),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 10),
           if (alreadyOwned)
             Text(
               'LISTO',
-              style: GoogleFonts.pressStart2p(color: Colors.green, fontSize: 10),
+              style: GoogleFonts.pressStart2p(
+                color: Colors.green,
+                fontSize: 10,
+              ),
             )
           else if (isLocked)
-             Text(
+            Text(
               'WIP',
               style: GoogleFonts.pressStart2p(color: Colors.grey, fontSize: 10),
             )
@@ -505,7 +572,10 @@ class _ShopScreenState extends State<ShopScreen> {
             GestureDetector(
               onTap: canPurchase ? onPurchase : null,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: canAfford ? Colors.amber : Colors.grey,
                   borderRadius: BorderRadius.circular(5),
@@ -550,7 +620,10 @@ class _ShopScreenState extends State<ShopScreen> {
             const SizedBox(height: 5),
             Text(
               '+$amount',
-              style: GoogleFonts.pressStart2p(color: Colors.amber, fontSize: 10),
+              style: GoogleFonts.pressStart2p(
+                color: Colors.amber,
+                fontSize: 10,
+              ),
             ),
             const SizedBox(height: 5),
             Container(
@@ -561,7 +634,10 @@ class _ShopScreenState extends State<ShopScreen> {
               ),
               child: Text(
                 '\$${priceMxn.toStringAsFixed(0)} MXN',
-                style: GoogleFonts.pressStart2p(color: Colors.white, fontSize: 8),
+                style: GoogleFonts.pressStart2p(
+                  color: Colors.white,
+                  fontSize: 8,
+                ),
               ),
             ),
           ],

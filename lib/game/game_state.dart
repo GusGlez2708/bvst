@@ -56,10 +56,18 @@ class GameState {
     }
   }
 
-  /// Add coins (e.g., from killing enemies)
+  /// Add coins (e.g., from killing enemies or purchases)
   Future<void> addCoins(int amount) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw Exception('Cannot add coins: User not authenticated');
+    }
+
     _coins += amount;
+    print('💰 Adding $amount coins. New total: $_coins');
+
     await _syncCoins();
+    print('✓ Coins successfully synced to database');
   }
 
   /// Attempt to purchase double shot
@@ -160,15 +168,19 @@ class GameState {
     }
   }
 
-  /// Sync coins to database
+  /// Sync coins to database - throws on error instead of silently failing
   Future<void> _syncCoins() async {
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) return;
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw Exception('Cannot sync coins: User not authenticated');
+    }
 
+    try {
       await _supabase.from('users').update({'coins': _coins}).eq('id', user.id);
+      print('💾 Synced $_coins coins to database for user ${user.email}');
     } catch (e) {
-      print('Error syncing coins: $e');
+      print('✗ Error syncing coins to database: $e');
+      throw Exception('Failed to sync coins to database: $e');
     }
   }
 
