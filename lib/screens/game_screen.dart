@@ -3,6 +3,7 @@ import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/game/battle_game.dart';
 import 'package:bvst/game/dialogue_system.dart';
 import 'package:bvst/screens/pause_menu.dart';
+import 'package:bvst/widgets/ability_widget.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,7 +20,7 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   int _countdown = 1;
   Timer? _timer;
-  bool _isCountingDown = false; 
+  bool _isCountingDown = false;
   late final BattleGame _game;
   bool _isPaused = false;
   bool _isInDialogue = false;
@@ -50,12 +51,12 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         }
       },
     );
-    
+
     // Initialize dialogue state directly
     _isInDialogue = true;
     _currentDialogueLines = DialogueData.getIntroForLevel(1);
     _currentDialogueOnFinished = _onIntroDialogueFinished;
-    
+
     AdService().loadBanner();
   }
 
@@ -72,7 +73,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
       _isInDialogue = false;
       _currentDialogueLines = null;
       _currentDialogueOnFinished = null;
-      _isCountingDown = true; 
+      _isCountingDown = true;
     });
     _startCountdown();
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -86,7 +87,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
       _currentDialogueLines = null;
       _currentDialogueOnFinished = null;
     });
-    
+
     AudioManager().playUiSfx('victory.mp3');
     Navigator.pushReplacementNamed(
       context,
@@ -104,7 +105,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
       if (!_isPaused && !_isCountingDown && !_isInDialogue) {
         _pauseGame();
       }
@@ -123,15 +125,15 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         });
       } else {
         _timer?.cancel();
-        AudioManager().playGameBgm(); 
+        AudioManager().playGameBgm();
         setState(() {
           _isCountingDown = false;
           _game.player.startBehavior();
         });
-        
+
         Future.delayed(const Duration(seconds: 1), () {
           if (mounted && !_isPaused && !_isInDialogue) {
-             _game.enemy.startBehavior();
+            _game.enemy.startBehavior();
           }
         });
       }
@@ -178,11 +180,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
           border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
         ),
         child: const Center(
-          child: Icon(
-            Icons.swap_horiz,
-            color: Colors.white,
-            size: 40,
-          ),
+          child: Icon(Icons.swap_horiz, color: Colors.white, size: 40),
         ),
       ),
     );
@@ -207,11 +205,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
           ],
         ),
         child: const Center(
-          child: Icon(
-            Icons.arrow_upward,
-            color: Colors.white,
-            size: 40,
-          ),
+          child: Icon(Icons.arrow_upward, color: Colors.white, size: 40),
         ),
       ),
     );
@@ -298,8 +292,12 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                     ),
                   ),
                 ),
+                // Ability Widget - shows unlocked abilities
+                AbilityWidget(game: _game),
               ],
-              if (_isInDialogue && _currentDialogueLines != null && _currentDialogueOnFinished != null)
+              if (_isInDialogue &&
+                  _currentDialogueLines != null &&
+                  _currentDialogueOnFinished != null)
                 DialogueOverlay(
                   lines: _currentDialogueLines!,
                   onFinished: _currentDialogueOnFinished!,

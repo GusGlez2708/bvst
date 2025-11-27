@@ -18,7 +18,8 @@ class Player extends SpriteComponent
   PlayerDirection _direction = PlayerDirection.none;
   bool _isShooting = false;
   double speed = 0.0; // Made public for level mechanics
-  double damageMultiplier = 1.0; // Made public for level mechanics (e.g., weakening)
+  double damageMultiplier =
+      1.0; // Made public for level mechanics (e.g., weakening)
   bool canMove = true; // New property for Level 4 mechanics
 
   // --- Timers ---
@@ -68,19 +69,19 @@ class Player extends SpriteComponent
     size = Vector2(newWidth, newHeight);
 
     // Posición inicial
-    position = Vector2(
-      game.size.x / 2,
-      game.size.y - (size.y / 2) - 35,
-    );
+    position = Vector2(game.size.x / 2, game.size.y - (size.y / 2) - 35);
 
     add(RectangleHitbox());
 
     // Configura los timers
     _shootCooldown = Timer(0.5, onTick: () => _canShoot = true);
-    _shootSpriteTimer = Timer(0.3, onTick: () {
-      _isShooting = false;
-      _updateSprite();
-    });
+    _shootSpriteTimer = Timer(
+      0.3,
+      onTick: () {
+        _isShooting = false;
+        _updateSprite();
+      },
+    );
   }
 
   void _updateSprite() {
@@ -143,7 +144,9 @@ class Player extends SpriteComponent
   void render(Canvas canvas) {
     if (_isFlashing) {
       final flashCycle = (_flashElapsed * 10) % 1.0;
-      paint.color = const Color(0xFFFFFFFF).withOpacity(flashCycle < 0.5 ? 0.3 : 1.0);
+      paint.color = const Color(
+        0xFFFFFFFF,
+      ).withOpacity(flashCycle < 0.5 ? 0.3 : 1.0);
     }
     super.render(canvas);
   }
@@ -169,28 +172,35 @@ class Player extends SpriteComponent
 
   void shoot() async {
     if (!canMove && _direction == PlayerDirection.none) {
-       // Allow shooting if immobile? User said "personaje se quedara inmóvil" then "lo podremos atacar".
-       // I'll assume shooting is allowed even if movement isn't, OR I'll re-enable movement for the attack phase.
-       // In BattleGameLevel4 I re-enable canMove for the vulnerable phase, so this check is fine.
+      // Allow shooting if immobile
     }
-    
+
     if (_canShoot) {
       _isShooting = true;
-      _updateSprite(); // Cambia al sprite de disparo
-      _shootSpriteTimer.start(); // Inicia el timer para revertirlo
+      _updateSprite();
+      _shootSpriteTimer.start();
 
       AudioManager().playGameSfx('laser.mp3');
 
-      final gameState = GameState();
-      bool hasDoubleShot = gameState.hasDoubleShot;
+      // Check if Double Shot ability is ACTIVE (not just unlocked)
+      bool hasDoubleShot = game.abilities.doubleShotActive;
 
       if (hasDoubleShot) {
-        final leftBullet = Bullet(isPlayerBullet: true, position: position + Vector2(-size.x * 0.2, -size.y / 2));
-        final rightBullet = Bullet(isPlayerBullet: true, position: position + Vector2(size.x * 0.2, -size.y / 2));
+        final leftBullet = Bullet(
+          isPlayerBullet: true,
+          position: position + Vector2(-size.x * 0.2, -size.y / 2),
+        );
+        final rightBullet = Bullet(
+          isPlayerBullet: true,
+          position: position + Vector2(size.x * 0.2, -size.y / 2),
+        );
         game.add(leftBullet);
         game.add(rightBullet);
       } else {
-        final bullet = Bullet(isPlayerBullet: true, position: position + Vector2(0, -size.y / 2));
+        final bullet = Bullet(
+          isPlayerBullet: true,
+          position: position + Vector2(0, -size.y / 2),
+        );
         game.add(bullet);
       }
 
@@ -198,27 +208,38 @@ class Player extends SpriteComponent
       _shootCooldown.start();
     }
   }
-  
+
+  /// Heal player by 1 heart (for Extra Heart ability)
+  void healHeart() {
+    if (health < maxHealth) {
+      health++;
+      print('❤️ Player healed! Health: $health/$maxHealth');
+      AudioManager().playGameSfx('start.mp3'); // Play heal sound
+    } else {
+      print('❤️ Already at max health!');
+    }
+  }
+
   void takeDamage(int amount) {
-      if (_isInvincible) return;
+    if (_isInvincible) return;
 
-      AudioManager().playGameSfx('damage_prota.mp3');
-      
-      // Apply damage multiplier (e.g., 2.0 when weakened, 1.0 normally)
-      final damageAmount = (amount * damageMultiplier).round();
-      health -= damageAmount;
-      
-      _isFlashing = true;
-      _isInvincible = true;
-      _flashElapsed = 0.0;
+    AudioManager().playGameSfx('damage_prota.mp3');
 
-      final particle = CollisionParticle(
-        position: position.clone(),
-        color: const Color(0xFF00FF00),
-      );
-      game.add(particle);
+    // Apply damage multiplier (e.g., 2.0 when weakened, 1.0 normally)
+    final damageAmount = (amount * damageMultiplier).round();
+    health -= damageAmount;
 
-      game.checkWinCondition();
+    _isFlashing = true;
+    _isInvincible = true;
+    _flashElapsed = 0.0;
+
+    final particle = CollisionParticle(
+      position: position.clone(),
+      color: const Color(0xFF00FF00),
+    );
+    game.add(particle);
+
+    game.checkWinCondition();
   }
 
   @override
@@ -231,11 +252,11 @@ class Player extends SpriteComponent
       if (_isInvincible) return;
 
       AudioManager().playGameSfx('damage_prota.mp3');
-      
+
       // Apply damage multiplier (e.g., 2.0 when weakened, 1.0 normally)
       final damageAmount = (1 * damageMultiplier).round();
       health -= damageAmount;
-      
+
       other.removeFromParent();
 
       _isFlashing = true;

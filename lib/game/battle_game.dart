@@ -1,5 +1,7 @@
+import 'package:bvst/game/ability_manager.dart';
 import 'package:bvst/game/enemy.dart'; // Restore Enemy import
 import 'package:bvst/game/enemy_lvl1.dart'; // Import EnemyLevel1
+import 'package:bvst/game/game_state.dart';
 import 'package:bvst/game/player.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
@@ -10,6 +12,7 @@ class BattleGame extends FlameGame with HasCollisionDetection {
   late Player player;
   late Enemy enemy;
   late Sprite heartSprite;
+  late AbilityManager abilities;
   bool _isGameOver = false;
 
   BattleGame({required this.onGameOver});
@@ -18,13 +21,30 @@ class BattleGame extends FlameGame with HasCollisionDetection {
   Future<void> onLoad() async {
     await super.onLoad();
 
+    // Initialize abilities based on player's purchases
+    final gameState = GameState();
+    await gameState.loadGameState();
+
+    abilities = AbilityManager(
+      doubleShotUnlocked: gameState.hasDoubleShot,
+      extraHeartUnlocked: gameState.extraHeartsPurchased > 0,
+      extraHeartsAvailable: gameState.extraHeartsPurchased,
+    );
+
     player = Player();
     enemy = EnemyLevel1(); // Use EnemyLevel1
 
     add(player);
     add(enemy);
+    add(abilities); // Add abilities manager to update cooldowns
 
     heartSprite = await Sprite.load('heart.png');
+
+    print('🎮 Abilities initialized:');
+    print(
+      '  - Double Shot: ${abilities.doubleShotUnlocked ? "UNLOCKED" : "LOCKED"}',
+    );
+    print('  - Extra Hearts: ${abilities.extraHeartsAvailable} available');
   }
 
   @override
