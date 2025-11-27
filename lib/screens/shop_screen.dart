@@ -95,13 +95,18 @@ class _ShopScreenState extends State<ShopScreen> {
 
     if (itemType == 'double_shot') {
       success = await _gameState.purchaseDoubleShot();
-    } else if (itemType == 'extra_heart') {
-      success = await _gameState.purchaseExtraHeart();
+    } else if (itemType == 'invincibility') {
+      success = await _gameState.purchaseInvincibility();
     }
 
     if (success) {
       AudioManager().playUiSfx('start.mp3');
-      setState(() {}); // Refresh UI
+      // Use addPostFrameCallback to avoid setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {}); // Refresh UI
+        }
+      });
       _showPurchaseDialog(true, '¡Compra exitosa!');
     } else {
       _showPurchaseDialog(
@@ -115,18 +120,6 @@ class _ShopScreenState extends State<ShopScreen> {
     AudioManager().playUiSfx('start.mp3');
 
     try {
-      // 0. Check authentication BEFORE processing payment
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) {
-        _showPurchaseDialog(
-          false,
-          'Debes estar autenticado para comprar monedas.',
-        );
-        print('❌ Payment blocked: User not authenticated');
-        return;
-      }
-
-      print('👤 User authenticated: ${user.email}');
       print('💳 Starting payment for $amount coins (\$$priceMxn MXN)...');
 
       // 1. Mostrar loading
@@ -178,7 +171,7 @@ class _ShopScreenState extends State<ShopScreen> {
       await Stripe.instance.presentPaymentSheet();
 
       // 5. Si llega aquí, el pago fue exitoso
-      print('✅ Payment successful! Adding coins to database...');
+      print('✅ Payment successful! Adding coins...');
 
       // Wrap addCoins in try-catch to handle sync errors
       try {
@@ -322,15 +315,15 @@ class _ShopScreenState extends State<ShopScreen> {
                               title: 'DISPARO DOBLE',
                               price: GameState.doubleShotCost,
                               icon: Icons.double_arrow,
-                              alreadyOwned: _gameState.hasDoubleShot,
+                              alreadyOwned: false, // Can buy multiple times
                               onPurchase: () => _purchaseItem('double_shot'),
                             ),
                             _buildShopItem(
-                              title: 'CORAZÓN EXTRA',
-                              price: GameState.extraHeartCost,
-                              icon: Icons.favorite,
-                              alreadyOwned: !_gameState.canPurchaseExtraHeart,
-                              onPurchase: () => _purchaseItem('extra_heart'),
+                              title: 'INVENCIBILIDAD',
+                              price: GameState.invincibilityCost,
+                              icon: Icons.shield,
+                              alreadyOwned: false, // Can buy multiple times
+                              onPurchase: () => _purchaseItem('invincibility'),
                             ),
                             // Placeholders for future items (to show 4 items as requested)
                             _buildShopItem(

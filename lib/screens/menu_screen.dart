@@ -108,7 +108,7 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
                 _buildStyledButton(
                   text: 'CRÉDITOS',
                   onTap: () {
-                    print('Navegar a Créditos');
+                    Navigator.pushNamed(context, '/credits');
                   },
                 ),
               ],

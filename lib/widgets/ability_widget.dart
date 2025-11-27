@@ -1,6 +1,7 @@
 import 'package:bvst/game/battle_game.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Widget showing available abilities with cooldowns and activation buttons
@@ -21,7 +22,12 @@ class _AbilityWidgetState extends State<AbilityWidget> {
     widget.game.add(
       _RefreshTimer(
         onTick: () {
-          if (mounted) setState(() {});
+          if (mounted) {
+            // Use SchedulerBinding to defer setState until after current frame
+            SchedulerBinding.instance.addPostFrameCallback((_) {
+              if (mounted) setState(() {});
+            });
+          }
         },
       ),
     );
@@ -46,25 +52,22 @@ class _AbilityWidgetState extends State<AbilityWidget> {
               canActivate: abilities.canActivateDoubleShot,
               isActive: abilities.doubleShotActive,
               onTap: () {
-                if (abilities.activateDoubleShot()) {
-                  setState(() {});
-                }
+                abilities.activateDoubleShot();
+                // No setState needed - widget auto-refreshes via _RefreshTimer
               },
             ),
           const SizedBox(height: 10),
-          // Extra Heart Ability
-          if (abilities.extraHeartUnlocked)
+          // Invincibility Ability
+          if (abilities.invincibilityUnlocked)
             _buildAbilityButton(
-              icon: Icons.favorite,
-              label: 'Corazón Extra',
-              status: abilities.getExtraHeartStatus(),
-              canActivate: abilities.canUseExtraHeart,
-              isActive: false,
+              icon: Icons.shield,
+              label: 'Invencibilidad',
+              status: abilities.getInvincibilityStatus(),
+              canActivate: abilities.canActivateInvincibility,
+              isActive: abilities.invincibilityActive,
               onTap: () {
-                if (abilities.useExtraHeart()) {
-                  widget.game.player.healHeart();
-                  setState(() {});
-                }
+                abilities.activateInvincibility();
+                // No setState needed - widget auto-refreshes via _RefreshTimer
               },
             ),
         ],

@@ -86,6 +86,7 @@ class AudioManager {
       'debilidad_lvl4.mp3', // Level 4 weakness loop
       'grito.mp3',
       'contador.mp3',
+      'creditos.mp3', // Credits music
     ]);
   }
 

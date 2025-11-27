@@ -26,9 +26,8 @@ class BattleGame extends FlameGame with HasCollisionDetection {
     await gameState.loadGameState();
 
     abilities = AbilityManager(
-      doubleShotUnlocked: gameState.hasDoubleShot,
-      extraHeartUnlocked: gameState.extraHeartsPurchased > 0,
-      extraHeartsAvailable: gameState.extraHeartsPurchased,
+      doubleShotCharges: gameState.doubleShotCharges,
+      invincibilityCharges: gameState.invincibilityCharges,
     );
 
     player = Player();
@@ -41,10 +40,8 @@ class BattleGame extends FlameGame with HasCollisionDetection {
     heartSprite = await Sprite.load('heart.png');
 
     print('🎮 Abilities initialized:');
-    print(
-      '  - Double Shot: ${abilities.doubleShotUnlocked ? "UNLOCKED" : "LOCKED"}',
-    );
-    print('  - Extra Hearts: ${abilities.extraHeartsAvailable} available');
+    print('  - Double Shot: ${abilities.doubleShotCharges} charges');
+    print('  - Invincibility: ${abilities.invincibilityCharges} charges');
   }
 
   @override

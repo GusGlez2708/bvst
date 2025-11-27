@@ -54,13 +54,9 @@ class Player extends SpriteComponent
 
     sprite = idleSprite; // Sprite inicial
 
-    // Lógica de vida
-    final gameState = GameState();
-    await gameState.loadGameState();
-    int baseHealth = 3;
-    int purchasedExtraHearts = gameState.extraHeartsPurchased;
-    health = baseHealth + purchasedExtraHearts;
-    maxHealth = health;
+    // Lógica de vida - Always start with 3 hearts
+    health = 3;
+    maxHealth = 3;
 
     // Ajusta el tamaño (usa el sprite idle como referencia)
     double newHeight = game.size.y * 0.25;
@@ -209,19 +205,9 @@ class Player extends SpriteComponent
     }
   }
 
-  /// Heal player by 1 heart (for Extra Heart ability)
-  void healHeart() {
-    if (health < maxHealth) {
-      health++;
-      print('❤️ Player healed! Health: $health/$maxHealth');
-      AudioManager().playGameSfx('start.mp3'); // Play heal sound
-    } else {
-      print('❤️ Already at max health!');
-    }
-  }
-
   void takeDamage(int amount) {
-    if (_isInvincible) return;
+    // Check both temporary invincibility AND invincibility ability
+    if (_isInvincible || game.abilities.invincibilityActive) return;
 
     AudioManager().playGameSfx('damage_prota.mp3');
 
@@ -249,7 +235,8 @@ class Player extends SpriteComponent
   ) {
     super.onCollisionStart(intersectionPoints, other);
     if (other is Bullet && !other.isPlayerBullet) {
-      if (_isInvincible) return;
+      // Check both temporary invincibility AND invincibility ability
+      if (_isInvincible || game.abilities.invincibilityActive) return;
 
       AudioManager().playGameSfx('damage_prota.mp3');
 

@@ -15,6 +15,7 @@ import 'package:bvst/screens/game_screen_lvl3.dart'; // <- NUEVO NIVEL 3
 import 'package:bvst/screens/game_screen_lvl4.dart'; // <- NUEVO NIVEL 4
 import 'package:bvst/screens/game_screen_lvl5.dart'; // <- NUEVO NIVEL 5
 import 'package:bvst/screens/shop_screen.dart'; // <- NUEVO
+import 'package:bvst/screens/credits_screen.dart'; // <- NUEVO CRÉDITOS
 import 'package:supabase_flutter/supabase_flutter.dart'; // <- NUEVO
 import 'package:bvst/services/ad_service.dart'; // <- NUEVO
 
@@ -54,6 +55,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/menu': (context) => const MenuScreen(),
         '/shop': (context) => const ShopScreen(),
+        '/credits': (context) => const CreditsScreen(),
         '/game': (context) => const GameScreen(),
         '/result': (context) => const ResultScreen(),
         '/options': (context) => const OptionsScreen(),
@@ -94,9 +96,9 @@ class _AuthGateState extends State<AuthGate> {
         // User is already authenticated, go to menu
         Navigator.of(context).pushReplacementNamed('/menu');
       } else {
-        print('✗ No session found, showing login');
-        // No session, show login
-        Navigator.of(context).pushReplacementNamed('/login');
+        print('✗ No session found, allowing guest access');
+        // No session, allow guest to use the app
+        Navigator.of(context).pushReplacementNamed('/menu');
       }
     }
   }

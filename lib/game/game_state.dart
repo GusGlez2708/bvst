@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Singleton class to manage global game state including coins and upgrades
 class GameState {
@@ -9,162 +10,160 @@ class GameState {
   // Supabase client
   final _supabase = Supabase.instance.client;
 
+  // Local storage for guest mode
+  SharedPreferences? _prefs;
+  bool _isGuestMode = false;
+
   // Local cache of game state
   int _coins = 0;
-  bool _hasDoubleShot = false;
-  int _extraHeartsPurchased = 0;
+  int _doubleShotCharges = 0;
+  int _invincibilityCharges = 0;
   bool _isLoaded = false;
 
   // Pricing constants
   static const int coinsPerEnemyKill = 50;
   static const int doubleShotCost = 100;
-  static const int extraHeartCost = 50;
-  static const int maxExtraHeartsPerSession = 1;
+  static const int invincibilityCost = 50;
 
   // Getters
   int get coins => _coins;
-  bool get hasDoubleShot => _hasDoubleShot;
-  int get extraHeartsPurchased => _extraHeartsPurchased;
-  bool get canPurchaseExtraHeart =>
-      _extraHeartsPurchased < maxExtraHeartsPerSession;
+  int get doubleShotCharges => _doubleShotCharges;
+  int get invincibilityCharges => _invincibilityCharges;
 
-  /// Load user's game state from Supabase
+  /// Load user's game state from Supabase or local storage
   Future<void> loadGameState() async {
     try {
+      // Initialize SharedPreferences if not already done
+      _prefs ??= await SharedPreferences.getInstance();
+      
       final user = _supabase.auth.currentUser;
       if (user == null) {
-        print('No user logged in, using default state');
-        _resetToDefaults();
+        print('No user logged in, using guest mode with local storage');
+        _isGuestMode = true;
+        await _loadFromLocal();
         return;
       }
 
+      // User is authenticated, load from Supabase
+      _isGuestMode = false;
       final response = await _supabase
           .from('users')
-          .select('coins, has_double_shot, extra_hearts_purchased')
+          .select('coins, double_shot_charges, invincibility_charges')
           .eq('id', user.id)
           .single();
 
       _coins = response['coins'] ?? 0;
-      _hasDoubleShot = response['has_double_shot'] ?? false;
-      _extraHeartsPurchased = response['extra_hearts_purchased'] ?? 0;
+      _doubleShotCharges = response['double_shot_charges'] ?? 0;
+      _invincibilityCharges = response['invincibility_charges'] ?? 0;
       _isLoaded = true;
 
-      print('Game state loaded: $_coins coins, double shot: $_hasDoubleShot');
+      print('Game state loaded: $_coins coins, $_doubleShotCharges double shot charges, $_invincibilityCharges invincibility charges');
     } catch (e) {
       print('Error loading game state: $e');
       _resetToDefaults();
     }
   }
 
+  /// Load game state from local storage (guest mode)
+  Future<void> _loadFromLocal() async {
+    _coins = _prefs?.getInt('guest_coins') ?? 0;
+    _doubleShotCharges = _prefs?.getInt('guest_double_shot_charges') ?? 0;
+    _invincibilityCharges = _prefs?.getInt('guest_invincibility_charges') ?? 0;
+    _isLoaded = true;
+    print('💾 Loaded guest state: $_coins coins, $_doubleShotCharges DS charges, $_invincibilityCharges INV charges');
+  }
+
+  /// Save game state to local storage (guest mode)
+  Future<void> _saveToLocal() async {
+    await _prefs?.setInt('guest_coins', _coins);
+    await _prefs?.setInt('guest_double_shot_charges', _doubleShotCharges);
+    await _prefs?.setInt('guest_invincibility_charges', _invincibilityCharges);
+    print('💾 Saved guest state: $_coins coins');
+  }
+
   /// Add coins (e.g., from killing enemies or purchases)
   Future<void> addCoins(int amount) async {
-    final user = _supabase.auth.currentUser;
-    if (user == null) {
-      throw Exception('Cannot add coins: User not authenticated');
-    }
-
     _coins += amount;
     print('💰 Adding $amount coins. New total: $_coins');
 
-    await _syncCoins();
-    print('✓ Coins successfully synced to database');
+    if (_isGuestMode) {
+      await _saveToLocal();
+      print('✓ Coins saved to local storage (guest mode)');
+    } else {
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        throw Exception('Cannot add coins: User not authenticated');
+      }
+      await _syncCoins();
+      print('✓ Coins successfully synced to database');
+    }
   }
 
-  /// Attempt to purchase double shot
+  /// Purchase double shot (adds 1 charge)
   Future<bool> purchaseDoubleShot() async {
-    if (_hasDoubleShot) {
-      print('Double shot already purchased');
-      return false;
-    }
-
     if (_coins < doubleShotCost) {
       print('Not enough coins for double shot');
       return false;
     }
 
     try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) return false;
-
-      // Use the purchase_item function from SQL
-      final result = await _supabase.rpc(
-        'purchase_item',
-        params: {
-          'user_id': user.id,
-          'item_cost': doubleShotCost,
-          'item_type': 'double_shot',
-        },
-      );
-
-      if (result == true) {
-        _coins -= doubleShotCost;
-        _hasDoubleShot = true;
-        print('Double shot purchased successfully');
-        return true;
+      _coins -= doubleShotCost;
+      _doubleShotCharges++;
+      
+      if (_isGuestMode) {
+        await _saveToLocal();
+        print('Double shot purchased (guest mode): $_doubleShotCharges charges');
+      } else {
+        final user = _supabase.auth.currentUser;
+        if (user == null) return false;
+        
+        // Directly update database
+        await _supabase.from('users').update({
+          'coins': _coins,
+          'double_shot_charges': _doubleShotCharges,
+        }).eq('id', user.id);
+        
+        print('Double shot purchased: $_doubleShotCharges charges');
       }
-
-      return false;
+      
+      return true;
     } catch (e) {
       print('Error purchasing double shot: $e');
       return false;
     }
   }
 
-  /// Attempt to purchase extra heart
-  Future<bool> purchaseExtraHeart() async {
-    if (!canPurchaseExtraHeart) {
-      print('Already purchased max extra hearts for this session');
-      return false;
-    }
-
-    if (_coins < extraHeartCost) {
-      print('Not enough coins for extra heart');
+  /// Purchase invincibility (adds 1 charge)
+  Future<bool> purchaseInvincibility() async {
+    if (_coins < invincibilityCost) {
+      print('Not enough coins for invincibility');
       return false;
     }
 
     try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) return false;
-
-      // Use the purchase_item function from SQL
-      final result = await _supabase.rpc(
-        'purchase_item',
-        params: {
-          'user_id': user.id,
-          'item_cost': extraHeartCost,
-          'item_type': 'extra_heart',
-        },
-      );
-
-      if (result == true) {
-        _coins -= extraHeartCost;
-        _extraHeartsPurchased++;
-        print('Extra heart purchased successfully');
-        return true;
+      _coins -= invincibilityCost;
+      _invincibilityCharges++;
+      
+      if (_isGuestMode) {
+        await _saveToLocal();
+        print('Invincibility purchased (guest mode): $_invincibilityCharges charges');
+      } else {
+        final user = _supabase.auth.currentUser;
+        if (user == null) return false;
+        
+        // Directly update database
+        await _supabase.from('users').update({
+          'coins': _coins,
+          'invincibility_charges': _invincibilityCharges,
+        }).eq('id', user.id);
+        
+        print('Invincibility purchased: $_invincibilityCharges charges');
       }
-
-      return false;
+      
+      return true;
     } catch (e) {
-      print('Error purchasing extra heart: $e');
+      print('Error purchasing invincibility: $e');
       return false;
-    }
-  }
-
-  /// Reset session-specific purchases (call when starting new game)
-  Future<void> resetSessionPurchases() async {
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) return;
-
-      await _supabase.rpc(
-        'reset_session_purchases',
-        params: {'user_id': user.id},
-      );
-
-      _extraHeartsPurchased = 0;
-      print('Session purchases reset');
-    } catch (e) {
-      print('Error resetting session purchases: $e');
     }
   }
 
@@ -187,8 +186,8 @@ class GameState {
   /// Reset to default values
   void _resetToDefaults() {
     _coins = 0;
-    _hasDoubleShot = false;
-    _extraHeartsPurchased = 0;
+    _doubleShotCharges = 0;
+    _invincibilityCharges = 0;
     _isLoaded = true;
   }
 }

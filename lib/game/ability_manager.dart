@@ -2,50 +2,50 @@ import 'package:flame/components.dart';
 
 /// Manages player abilities including cooldowns and limited uses
 class AbilityManager extends Component {
-  // Double Shot ability
-  bool doubleShotUnlocked = false;
+  // Double Shot ability - now consumable (single use)
+  int doubleShotCharges = 0;
   bool doubleShotActive = false;
   double doubleShotDuration = 10.0; // Active for 10 seconds
-  double doubleShotCooldown = 30.0; // 30 second cooldown
   double doubleShotTimeRemaining = 0; // Time remaining for active effect
-  double doubleShotCooldownRemaining = 0; // Time remaining for cooldown
 
-  // Extra Heart ability
-  bool extraHeartUnlocked = false;
-  int extraHeartsAvailable = 0; // How many uses available
+  // Invincibility ability - now consumable (single use)
+  int invincibilityCharges = 0;
+  bool invincibilityActive = false;
+  double invincibilityDuration = 7.0; // Active for 7 seconds
+  double invincibilityTimeRemaining = 0; // Time remaining for active effect
 
   AbilityManager({
-    required this.doubleShotUnlocked,
-    required this.extraHeartUnlocked,
-    required this.extraHeartsAvailable,
+    required this.doubleShotCharges,
+    required this.invincibilityCharges,
   });
 
   @override
   void update(double dt) {
     super.update(dt);
 
-    // Update Double Shot timers
+    // Update Double Shot timer
     if (doubleShotActive) {
       doubleShotTimeRemaining -= dt;
       if (doubleShotTimeRemaining <= 0) {
         doubleShotActive = false;
-        doubleShotCooldownRemaining = doubleShotCooldown;
         print('⚔️ Double Shot deactivated');
       }
     }
 
-    if (doubleShotCooldownRemaining > 0) {
-      doubleShotCooldownRemaining -= dt;
-      if (doubleShotCooldownRemaining < 0) {
-        doubleShotCooldownRemaining = 0;
+    // Update Invincibility timer
+    if (invincibilityActive) {
+      invincibilityTimeRemaining -= dt;
+      if (invincibilityTimeRemaining <= 0) {
+        invincibilityActive = false;
+        print('🛡️ Invincibility deactivated');
       }
     }
   }
 
-  /// Activate Double Shot ability
+  /// Activate Double Shot ability (consumes 1 charge)
   bool activateDoubleShot() {
-    if (!doubleShotUnlocked) {
-      print('❌ Double Shot not unlocked');
+    if (doubleShotCharges <= 0) {
+      print('❌ No Double Shot charges available');
       return false;
     }
 
@@ -54,60 +54,60 @@ class AbilityManager extends Component {
       return false;
     }
 
-    if (doubleShotCooldownRemaining > 0) {
-      print(
-        '❌ Double Shot on cooldown: ${doubleShotCooldownRemaining.toStringAsFixed(1)}s',
-      );
-      return false;
-    }
-
     doubleShotActive = true;
     doubleShotTimeRemaining = doubleShotDuration;
-    print('⚔️ Double Shot activated for ${doubleShotDuration}s!');
+    doubleShotCharges--; // Consume charge
+    print('⚔️ Double Shot activated! Charges remaining: $doubleShotCharges');
     return true;
   }
 
-  /// Use Extra Heart ability (heal 1 heart)
-  bool useExtraHeart() {
-    if (!extraHeartUnlocked) {
-      print('❌ Extra Heart not unlocked');
+  /// Activate Invincibility ability (consumes 1 charge)
+  bool activateInvincibility() {
+    if (invincibilityCharges <= 0) {
+      print('❌ No Invincibility charges available');
       return false;
     }
 
-    if (extraHeartsAvailable <= 0) {
-      print('❌ No Extra Hearts available');
+    if (invincibilityActive) {
+      print('❌ Invincibility already active');
       return false;
     }
 
-    extraHeartsAvailable--;
-    print('❤️ Extra Heart used! Remaining: $extraHeartsAvailable');
+    invincibilityActive = true;
+    invincibilityTimeRemaining = invincibilityDuration;
+    invincibilityCharges--; // Consume charge
+    print('🛡️ Invincibility activated! Charges remaining: $invincibilityCharges');
     return true;
   }
 
   /// Check if Double Shot can be activated
-  bool get canActivateDoubleShot =>
-      doubleShotUnlocked &&
-      !doubleShotActive &&
-      doubleShotCooldownRemaining <= 0;
+  bool get canActivateDoubleShot => doubleShotCharges > 0 && !doubleShotActive;
 
-  /// Check if Extra Heart can be used
-  bool get canUseExtraHeart => extraHeartUnlocked && extraHeartsAvailable > 0;
+  /// Check if Invincibility can be activated
+  bool get canActivateInvincibility =>
+      invincibilityCharges > 0 && !invincibilityActive;
 
   /// Get Double Shot status for UI
   String getDoubleShotStatus() {
-    if (!doubleShotUnlocked) return 'LOCKED';
+    if (doubleShotCharges == 0) return 'COMPRAR';
     if (doubleShotActive) {
       return '${doubleShotTimeRemaining.toStringAsFixed(1)}s';
     }
-    if (doubleShotCooldownRemaining > 0) {
-      return '${doubleShotCooldownRemaining.toStringAsFixed(0)}s';
-    }
-    return 'READY';
+    return 'x$doubleShotCharges';
   }
 
-  /// Get Extra Heart status for UI
-  String getExtraHeartStatus() {
-    if (!extraHeartUnlocked) return 'LOCKED';
-    return 'x$extraHeartsAvailable';
+  /// Get Invincibility status for UI
+  String getInvincibilityStatus() {
+    if (invincibilityCharges == 0) return 'COMPRAR';
+    if (invincibilityActive) {
+      return '${invincibilityTimeRemaining.toStringAsFixed(1)}s';
+    }
+    return 'x$invincibilityCharges';
   }
+
+  /// Check if Double Shot is unlocked (has at least 1 charge)
+  bool get doubleShotUnlocked => doubleShotCharges > 0;
+
+  /// Check if Invincibility is unlocked (has at least 1 charge)
+  bool get invincibilityUnlocked => invincibilityCharges > 0;
 }
