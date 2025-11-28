@@ -3,6 +3,7 @@ import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/game/battle_game_lvl4.dart';
 import 'package:bvst/game/dialogue_system.dart';
 import 'package:bvst/screens/pause_menu.dart';
+import 'package:bvst/widgets/ability_widget.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -286,6 +287,8 @@ class _GameScreenLevel4State extends State<GameScreenLevel4> with WidgetsBinding
                     ),
                   ),
                 ),
+                // Ability Widget - shows unlocked abilities
+                AbilityWidget(game: _game),
               ],
               if (_isInDialogue && _currentDialogueLines != null && _currentDialogueOnFinished != null)
                 DialogueOverlay(

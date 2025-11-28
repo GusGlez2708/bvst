@@ -23,12 +23,15 @@ class BattleGame extends FlameGame with HasCollisionDetection {
 
     // Initialize abilities based on player's purchases
     final gameState = GameState();
-    await gameState.loadGameState();
+    if (!gameState.isLoaded) {
+      await gameState.loadGameState();
+    }
 
     abilities = AbilityManager(
       doubleShotCharges: gameState.doubleShotCharges,
       invincibilityCharges: gameState.invincibilityCharges,
     );
+    print('🎮 BattleGame initialized. Double Shot: ${gameState.doubleShotCharges}');
 
     player = Player();
     enemy = EnemyLevel1(); // Use EnemyLevel1

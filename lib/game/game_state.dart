@@ -1,8 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Singleton class to manage global game state including coins and upgrades
-class GameState {
+class GameState with ChangeNotifier {
   static final GameState _instance = GameState._internal();
   factory GameState() => _instance;
   GameState._internal();
@@ -28,7 +29,9 @@ class GameState {
   // Getters
   int get coins => _coins;
   int get doubleShotCharges => _doubleShotCharges;
+
   int get invincibilityCharges => _invincibilityCharges;
+  bool get isLoaded => _isLoaded;
 
   /// Load user's game state from Supabase or local storage
   Future<void> loadGameState() async {
@@ -55,7 +58,9 @@ class GameState {
       _coins = response['coins'] ?? 0;
       _doubleShotCharges = response['double_shot_charges'] ?? 0;
       _invincibilityCharges = response['invincibility_charges'] ?? 0;
+      _invincibilityCharges = response['invincibility_charges'] ?? 0;
       _isLoaded = true;
+      print('✅ GameState loaded from Supabase. Double Shot: $_doubleShotCharges');
 
       print('Game state loaded: $_coins coins, $_doubleShotCharges double shot charges, $_invincibilityCharges invincibility charges');
     } catch (e) {
@@ -164,6 +169,55 @@ class GameState {
     } catch (e) {
       print('Error purchasing invincibility: $e');
       return false;
+    }
+  }
+
+  /// Consume one Double Shot charge
+  Future<void> consumeDoubleShot() async {
+    if (_doubleShotCharges <= 0) return;
+
+    _doubleShotCharges--;
+    print('📉 Consumed Double Shot. New count: $_doubleShotCharges');
+    notifyListeners();
+
+    try {
+      if (_supabase.auth.currentUser == null) {
+        // Guest mode: save to local storage
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('double_shot_charges', _doubleShotCharges);
+      } else {
+        // Authenticated: update database
+        await _supabase.from('users').update({
+          'double_shot_charges': _doubleShotCharges,
+        }).eq('id', _supabase.auth.currentUser!.id);
+      }
+    } catch (e) {
+      print('Error consuming double shot charge: $e');
+      // Revert on error? For now, we trust local state
+    }
+  }
+
+  /// Consume one Invincibility charge
+  Future<void> consumeInvincibility() async {
+    if (_invincibilityCharges <= 0) return;
+
+    _invincibilityCharges--;
+    print('📉 Consumed Invincibility. New count: $_invincibilityCharges');
+    notifyListeners();
+
+    try {
+      if (_supabase.auth.currentUser == null) {
+        // Guest mode: save to local storage
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('invincibility_charges', _invincibilityCharges);
+      } else {
+        // Authenticated: update database
+        await _supabase.from('users').update({
+          'invincibility_charges': _invincibilityCharges,
+        }).eq('id', _supabase.auth.currentUser!.id);
+      }
+    } catch (e) {
+      print('Error consuming invincibility charge: $e');
     }
   }
 

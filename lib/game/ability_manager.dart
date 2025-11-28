@@ -1,3 +1,4 @@
+import 'package:bvst/game/game_state.dart';
 import 'package:flame/components.dart';
 
 /// Manages player abilities including cooldowns and limited uses
@@ -56,7 +57,11 @@ class AbilityManager extends Component {
 
     doubleShotActive = true;
     doubleShotTimeRemaining = doubleShotDuration;
-    doubleShotCharges--; // Consume charge
+    doubleShotCharges--; // Local decrement for immediate feedback
+    
+    // Persist consumption
+    GameState().consumeDoubleShot();
+    
     print('⚔️ Double Shot activated! Charges remaining: $doubleShotCharges');
     return true;
   }
@@ -75,7 +80,11 @@ class AbilityManager extends Component {
 
     invincibilityActive = true;
     invincibilityTimeRemaining = invincibilityDuration;
-    invincibilityCharges--; // Consume charge
+    invincibilityCharges--; // Local decrement for immediate feedback
+    
+    // Persist consumption
+    GameState().consumeInvincibility();
+    
     print('🛡️ Invincibility activated! Charges remaining: $invincibilityCharges');
     return true;
   }

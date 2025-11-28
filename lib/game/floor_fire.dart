@@ -58,8 +58,7 @@ class FloorFire extends SpriteAnimationComponent
   ) {
     super.onCollisionStart(intersectionPoints, other);
     if (other is Player) {
-      game.player.health--;
-      game.checkWinCondition();
+      game.player.takeDamage(1);
     }
   }
 }
