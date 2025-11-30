@@ -27,7 +27,8 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
       AudioManager().pauseMenuBgm();
     } else if (state == AppLifecycleState.resumed) {
       AudioManager().resumeMenuBgm();
@@ -67,16 +68,32 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
                   text: 'JUGAR',
                   onTap: () async {
                     // AudioManager().playUiSfx('start.mp3'); // <-- REMOVED: User requested BGM only
-                    
+
                     final progressService = ProgressService();
                     final savedLevel = await progressService.getSavedLevel();
-                    
+
+                    // Level 1 has cinematic
+                    if (savedLevel == 1) {
+                      if (context.mounted) {
+                        Navigator.pushNamed(
+                          context,
+                          '/cinematic',
+                          arguments: {
+                            'videoPath': 'assets/cinematicas/WakeUpLeve1.mp4',
+                            'nextRoute': '/game',
+                          },
+                        );
+                      }
+                      return;
+                    }
+
+                    // Other levels go directly to game (no cinematics yet)
                     String route = '/game';
                     if (savedLevel == 2) route = '/game_lvl2';
                     if (savedLevel == 3) route = '/game_lvl3';
                     if (savedLevel == 4) route = '/game_lvl4';
                     if (savedLevel == 5) route = '/game_lvl5';
-                    
+
                     if (context.mounted) {
                       Navigator.pushNamed(context, route);
                     }

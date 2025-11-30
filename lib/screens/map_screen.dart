@@ -139,12 +139,27 @@ class MapScreen extends StatelessWidget {
               : () {
                   AudioManager().playUiSfx('start.mp3');
                   // Navegar al juego según el nivel específico
+
+                  // Level 1 has cinematic
+                  if (level == 1) {
+                    Navigator.pushNamed(
+                      context,
+                      '/cinematic',
+                      arguments: {
+                        'videoPath': 'assets/cinematicas/WakeUpLeve1.mp4',
+                        'nextRoute': '/game',
+                      },
+                    );
+                    return;
+                  }
+
+                  // Other levels go directly to game (no cinematics yet)
                   String route = '/game';
                   if (level == 2) route = '/game_lvl2';
                   if (level == 3) route = '/game_lvl3';
                   if (level == 4) route = '/game_lvl4';
                   if (level == 5) route = '/game_lvl5';
-                  
+
                   Navigator.pushNamed(context, route);
                 },
           child: Container(

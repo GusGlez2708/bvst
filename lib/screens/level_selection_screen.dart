@@ -8,7 +8,8 @@ class LevelSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Get level from arguments, default to 2 if not provided
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final int level = args?['level'] ?? 2;
 
     // Level configuration
@@ -84,6 +85,22 @@ class LevelSelectionScreen extends StatelessWidget {
                       child: GestureDetector(
                         onTap: () {
                           AudioManager().stopAllAudio();
+
+                          // Level 1 has cinematic
+                          if (level == 1) {
+                            Navigator.pushReplacementNamed(
+                              context,
+                              '/cinematic',
+                              arguments: {
+                                'videoPath':
+                                    'assets/cinematicas/WakeUpLeve1.mp4',
+                                'nextRoute': '/game',
+                              },
+                            );
+                            return;
+                          }
+
+                          // Other levels go directly (no cinematics yet)
                           Navigator.pushReplacementNamed(
                             context,
                             config['route'] as String,
