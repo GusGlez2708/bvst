@@ -2,6 +2,7 @@ import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/services/progress_service.dart'; // Import ProgressService
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:video_player/video_player.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -11,17 +12,34 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
+  late VideoPlayerController _videoController;
+  bool _isVideoInitialized = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     // Inicia la música del menú
     AudioManager().playMenuBgm();
+
+    // Initialize video background
+    _videoController =
+        VideoPlayerController.asset('assets/cinematicas/MenuDinamic.mp4')
+          ..setLooping(true)
+          ..initialize().then((_) {
+            if (mounted) {
+              setState(() {
+                _isVideoInitialized = true;
+              });
+              _videoController.play();
+            }
+          });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _videoController.dispose();
     super.dispose();
   }
 
@@ -40,14 +58,23 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
     return Scaffold(
       body: Stack(
         children: [
-          // --- 1. FONDO DE PANTALLA ---
-          // Tu imagen de fondo con el título y el cuadro verde.
+          // --- 1. VIDEO DE FONDO (LOOPING) ---
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/menu.png', // Asegúrate de que sea tu imagen correcta
-              fit: BoxFit.fill,
-              filterQuality: FilterQuality.high,
-            ),
+            child: _isVideoInitialized
+                ? FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: _videoController.value.size.width,
+                      height: _videoController.value.size.height,
+                      child: VideoPlayer(_videoController),
+                    ),
+                  )
+                : Container(
+                    color: Colors.black,
+                    child: const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    ),
+                  ),
           ),
 
           // --- 2. COLUMNA DE BOTONES (POSICIONADA) ---

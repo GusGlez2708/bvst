@@ -95,13 +95,19 @@ class _AuthGateState extends State<AuthGate> {
     if (mounted) {
       if (session != null) {
         print('✓ Existing session found for user: ${session.user.email}');
-        // User is already authenticated, go to menu
-        Navigator.of(context).pushReplacementNamed('/menu');
       } else {
         print('✗ No session found, allowing guest access');
-        // No session, allow guest to use the app
-        Navigator.of(context).pushReplacementNamed('/menu');
       }
+
+      // Always show opening cinematic first, then go to menu
+      Navigator.of(context).pushReplacementNamed(
+        '/cinematic',
+        arguments: {
+          'videoPath':
+              'assets/cinematicas/Pixel_Art_Hero_s_Melancholic_Journey.mp4',
+          'nextRoute': '/menu',
+        },
+      );
     }
   }
 

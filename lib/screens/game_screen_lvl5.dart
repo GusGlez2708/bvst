@@ -17,10 +17,11 @@ class GameScreenLevel5 extends StatefulWidget {
   State<GameScreenLevel5> createState() => _GameScreenLevel5State();
 }
 
-class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBindingObserver {
+class _GameScreenLevel5State extends State<GameScreenLevel5>
+    with WidgetsBindingObserver {
   int _countdown = 1;
   Timer? _timer;
-  bool _isCountingDown = false; 
+  bool _isCountingDown = false;
   late final BattleGameLevel5 _game;
   bool _isPaused = false;
   bool _isInDialogue = false;
@@ -51,12 +52,12 @@ class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBinding
         }
       },
     );
-    
+
     // Initialize dialogue state directly
     _isInDialogue = true;
     _currentDialogueLines = DialogueData.getIntroForLevel(5);
     _currentDialogueOnFinished = _onIntroDialogueFinished;
-    
+
     AdService().loadBanner();
   }
 
@@ -73,7 +74,7 @@ class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBinding
       _isInDialogue = false;
       _currentDialogueLines = null;
       _currentDialogueOnFinished = null;
-      _isCountingDown = true; 
+      _isCountingDown = true;
     });
     _startCountdown();
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -87,12 +88,18 @@ class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBinding
       _currentDialogueLines = null;
       _currentDialogueOnFinished = null;
     });
-    
+
     AudioManager().playUiSfx('victory.mp3');
+
+    // Show final cinematic before going to result screen
     Navigator.pushReplacementNamed(
       context,
-      '/result',
-      arguments: {'hasWon': true, 'currentLevel': 5},
+      '/cinematic',
+      arguments: {
+        'videoPath': 'assets/cinematicas/FinalScene.mp4',
+        'nextRoute': '/result',
+        'nextRouteArguments': {'hasWon': true, 'currentLevel': 5},
+      },
     );
   }
 
@@ -105,7 +112,8 @@ class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBinding
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
       if (!_isPaused && !_isCountingDown && !_isInDialogue) {
         _pauseGame();
       }
@@ -124,7 +132,7 @@ class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBinding
         });
       } else {
         _timer?.cancel();
-        AudioManager().playGameBgm('musica_lvl5.mp3'); 
+        AudioManager().playGameBgm('musica_lvl5.mp3');
         setState(() {
           _isCountingDown = false;
           _game.player.startBehavior();
@@ -181,20 +189,22 @@ class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBinding
         width: 140,
         height: 70,
         decoration: BoxDecoration(
-          color: _game.controlsInverted 
+          color: _game.controlsInverted
               ? const Color(0xFFFF4444).withOpacity(0.3) // Red when inverted
               : const Color(0xFF2196F3).withOpacity(0.3), // Blue when normal
           borderRadius: BorderRadius.circular(35),
           border: Border.all(
-            color: _game.controlsInverted 
-                ? Colors.red.withOpacity(0.8) 
-                : Colors.white.withOpacity(0.5), 
-            width: 2
+            color: _game.controlsInverted
+                ? Colors.red.withOpacity(0.8)
+                : Colors.white.withOpacity(0.5),
+            width: 2,
           ),
         ),
         child: Center(
           child: Icon(
-            _game.controlsInverted ? Icons.swap_horiz_outlined : Icons.swap_horiz,
+            _game.controlsInverted
+                ? Icons.swap_horiz_outlined
+                : Icons.swap_horiz,
             color: _game.controlsInverted ? Colors.red : Colors.white,
             size: 40,
           ),
@@ -222,11 +232,7 @@ class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBinding
           ],
         ),
         child: const Center(
-          child: Icon(
-            Icons.arrow_upward,
-            color: Colors.white,
-            size: 40,
-          ),
+          child: Icon(Icons.arrow_upward, color: Colors.white, size: 40),
         ),
       ),
     );
@@ -260,9 +266,7 @@ class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBinding
               GameWidget(
                 game: _game,
                 backgroundBuilder: (context) {
-                  return Container(
-                    color: Colors.black,
-                  );
+                  return Container(color: Colors.black);
                 },
               ),
               if (_isCountingDown)
@@ -313,7 +317,10 @@ class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBinding
                     right: 0,
                     child: Center(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFF4444).withOpacity(0.9),
                           borderRadius: BorderRadius.circular(20),
@@ -322,7 +329,11 @@ class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBinding
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
+                            const Icon(
+                              Icons.warning_amber_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               'CONTROLES INVERTIDOS',
@@ -340,7 +351,9 @@ class _GameScreenLevel5State extends State<GameScreenLevel5> with WidgetsBinding
                 // Ability Widget - shows unlocked abilities
                 AbilityWidget(game: _game),
               ],
-              if (_isInDialogue && _currentDialogueLines != null && _currentDialogueOnFinished != null)
+              if (_isInDialogue &&
+                  _currentDialogueLines != null &&
+                  _currentDialogueOnFinished != null)
                 DialogueOverlay(
                   lines: _currentDialogueLines!,
                   onFinished: _currentDialogueOnFinished!,

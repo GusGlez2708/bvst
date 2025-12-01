@@ -78,9 +78,18 @@ class _CinematicScreenState extends State<CinematicScreen> {
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final String nextRoute = args?['nextRoute'] ?? '/menu';
+    final Map<String, dynamic>? nextRouteArguments =
+        args?['nextRouteArguments'];
 
     _controller.pause();
-    Navigator.of(context).pushReplacementNamed(nextRoute);
+
+    if (nextRouteArguments != null) {
+      Navigator.of(
+        context,
+      ).pushReplacementNamed(nextRoute, arguments: nextRouteArguments);
+    } else {
+      Navigator.of(context).pushReplacementNamed(nextRoute);
+    }
   }
 
   void _skipCinematic() {
