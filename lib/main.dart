@@ -14,6 +14,7 @@ import 'package:bvst/screens/game_screen_lvl2.dart';
 import 'package:bvst/screens/game_screen_lvl3.dart'; // <- NUEVO NIVEL 3
 import 'package:bvst/screens/game_screen_lvl4.dart'; // <- NUEVO NIVEL 4
 import 'package:bvst/screens/game_screen_lvl5.dart'; // <- NUEVO NIVEL 5
+import 'package:bvst/screens/game_screen_infinite.dart'; // <- NUEVO MODO INFINITO
 import 'package:bvst/screens/shop_screen.dart'; // <- NUEVO
 import 'package:bvst/screens/credits_screen.dart'; // <- NUEVO CRÉDITOS
 import 'package:bvst/screens/cinematic_screen.dart'; // <- NUEVO CINEMÁTICAS
@@ -66,6 +67,7 @@ class MyApp extends StatelessWidget {
         '/game_lvl3': (context) => const GameScreenLevel3(),
         '/game_lvl4': (context) => const GameScreenLevel4(),
         '/game_lvl5': (context) => const GameScreenLevel5(),
+        '/game_infinite': (context) => const GameScreenInfinite(),
       },
     );
   }

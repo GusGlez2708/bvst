@@ -108,7 +108,21 @@ class MapScreen extends StatelessWidget {
             ),
           ),
 
-          // --- 8. BOTÓN VOLVER AL MENÚ ---
+          // --- 8. BOTÓN MODO INFINITO ---
+          Positioned(
+            bottom: size.height * 0.12, // 12% desde abajo
+            left: size.width * 0.5 - 40, // Centrado horizontalmente
+            child: _buildLevelMarker(
+              context,
+              level: 0, // Nivel 0 para modo infinito
+              isLocked: false,
+              label: "MODO INFINITO",
+              isPulse: true,
+              isInfinite: true, // Flag para identificar modo infinito
+            ),
+          ),
+
+          // --- 9. BOTÓN VOLVER AL MENÚ ---
           Positioned(
             top: 40,
             left: 20,
@@ -130,6 +144,7 @@ class MapScreen extends StatelessWidget {
     required bool isLocked,
     required String label,
     bool isPulse = false,
+    bool isInfinite = false,
   }) {
     return Column(
       children: [
@@ -138,6 +153,13 @@ class MapScreen extends StatelessWidget {
               ? null
               : () {
                   AudioManager().playUiSfx('start.mp3');
+
+                  // Handle infinite mode navigation
+                  if (isInfinite) {
+                    Navigator.pushNamed(context, '/game_infinite');
+                    return;
+                  }
+
                   // Navegar al juego según el nivel específico
 
                   // Level 1 has cinematic
@@ -163,36 +185,46 @@ class MapScreen extends StatelessWidget {
                   Navigator.pushNamed(context, route);
                 },
           child: Container(
-            width: 60,
-            height: 60,
+            width: isInfinite ? 80 : 60, // Bigger for infinite mode
+            height: isInfinite ? 80 : 60,
             decoration: BoxDecoration(
               color: isLocked
                   ? Colors.grey
-                  : (isPulse ? const Color(0xFF4FA0E4) : Colors.green),
+                  : (isInfinite
+                        ? const Color(0xFF8B00FF) // Purple for infinite
+                        : (isPulse ? const Color(0xFF4FA0E4) : Colors.green)),
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 3),
               boxShadow: [
                 BoxShadow(
                   color: isLocked
                       ? Colors.black
-                      : (isPulse
-                            ? const Color(0xFF4FA0E4).withOpacity(0.6)
-                            : Colors.green.withOpacity(0.6)),
+                      : (isInfinite
+                            ? const Color(0xFF8B00FF).withOpacity(0.8)
+                            : (isPulse
+                                  ? const Color(0xFF4FA0E4).withOpacity(0.6)
+                                  : Colors.green.withOpacity(0.6))),
                   blurRadius: 15,
-                  spreadRadius: isPulse ? 5 : 2,
+                  spreadRadius: isPulse || isInfinite ? 5 : 2,
                 ),
               ],
             ),
             child: Center(
               child: isLocked
                   ? const Icon(Icons.lock, color: Colors.white)
-                  : Text(
-                      '$level',
-                      style: GoogleFonts.pressStart2p(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
+                  : (isInfinite
+                        ? const Icon(
+                            Icons.all_inclusive,
+                            color: Colors.white,
+                            size: 40,
+                          )
+                        : Text(
+                            '$level',
+                            style: GoogleFonts.pressStart2p(
+                              color: Colors.white,
+                              fontSize: 20,
+                            ),
+                          )),
             ),
           ),
         ),
@@ -206,7 +238,11 @@ class MapScreen extends StatelessWidget {
             ),
             child: Text(
               label,
-              style: GoogleFonts.orbitron(color: Colors.white, fontSize: 10),
+              style: GoogleFonts.orbitron(
+                color: isInfinite ? const Color(0xFF8B00FF) : Colors.white,
+                fontSize: 10,
+                fontWeight: isInfinite ? FontWeight.bold : FontWeight.normal,
+              ),
             ),
           ),
       ],
