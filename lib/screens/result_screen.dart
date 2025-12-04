@@ -1,6 +1,7 @@
 import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/services/ad_service.dart'; // <-- NUEVO
 import 'package:bvst/services/progress_service.dart'; // Import ProgressService
+import 'package:bvst/services/score_service.dart'; // <- NUEVO for infinite scores
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -45,29 +46,39 @@ class _ResultScreenState extends State<ResultScreen>
       final int currentLevel = args['currentLevel'] ?? 1;
       final bool hasWon = args['hasWon'];
 
-      // Save Progress Logic
-      if (hasWon) {
+      // Save Progress Logic (only for story mode)
+      if (hasWon && currentLevel > 0) {
         final progressService = ProgressService();
         int nextLevelToSave = currentLevel + 1;
-        
+
         // If completed level 5 (final), reset to level 1
         if (currentLevel >= 5) {
           nextLevelToSave = 1;
         }
-        
+
         await progressService.saveLevel(nextLevelToSave);
       }
-      
+
+      // Save infinite mode score (currentLevel == 0 indicates infinite mode)
+      if (currentLevel == 0 && !hasWon) {
+        final int score = args['score'] ?? 0;
+        final scoreService = ScoreService();
+        // Round is passed from BattleGameInfinite
+        final int round = score ~/ 150; // Approximate if not passed
+        await scoreService.saveInfiniteScore(score, round);
+        print('📊 Infinite mode score saved: $score (Round $round)');
+      }
+
       // Show ad only if NOT level 1 (or if you want to show it on game over regardless of level, adjust logic)
       // User request: "solo quiero que cambies el del nivel 1, quiero que lo quites"
-      // Assuming this means remove it from Level 1 completion/gameover? 
+      // Assuming this means remove it from Level 1 completion/gameover?
       // "el que aparece cuando se muere el jugador esta bien, ahora, solo quiero que cambies el del nivel 1"
       // So if Game Over -> Show Ad. If Level 1 Win -> No Ad.
-      
+
       if (!hasWon) {
-         AdService().showInterstitial();
+        AdService().showInterstitial();
       } else if (currentLevel != 1) {
-         AdService().showInterstitial();
+        AdService().showInterstitial();
       }
     });
   }
@@ -83,7 +94,8 @@ class _ResultScreenState extends State<ResultScreen>
     final Map<String, dynamic> args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final bool hasWon = args['hasWon'];
-    final int currentLevel = args['currentLevel'] ?? 1; // Default to level 1 if not specified
+    final int currentLevel =
+        args['currentLevel'] ?? 1; // Default to level 1 if not specified
 
     // Determine next level for preview screen
     int? nextLevel;
@@ -143,7 +155,9 @@ class _ResultScreenState extends State<ResultScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (hasWon && nextLevel != null) // Show SIGUIENTE only if there's a next level
+                  if (hasWon &&
+                      nextLevel !=
+                          null) // Show SIGUIENTE only if there's a next level
                     Padding(
                       padding: const EdgeInsets.only(bottom: 20.0),
                       child: _buildStyledButton(

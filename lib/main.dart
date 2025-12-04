@@ -18,6 +18,7 @@ import 'package:bvst/screens/game_screen_infinite.dart'; // <- NUEVO MODO INFINI
 import 'package:bvst/screens/shop_screen.dart'; // <- NUEVO
 import 'package:bvst/screens/credits_screen.dart'; // <- NUEVO CRÉDITOS
 import 'package:bvst/screens/cinematic_screen.dart'; // <- NUEVO CINEMÁTICAS
+import 'package:bvst/screens/leaderboard_screen.dart'; // <- NUEVO LEADERBOARD
 import 'package:supabase_flutter/supabase_flutter.dart'; // <- NUEVO
 import 'package:bvst/services/ad_service.dart'; // <- NUEVO
 
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
         '/shop': (context) => const ShopScreen(),
         '/credits': (context) => const CreditsScreen(),
         '/cinematic': (context) => const CinematicScreen(),
+        '/leaderboard': (context) => const LeaderboardScreen(),
         '/game': (context) => const GameScreen(),
         '/result': (context) => const ResultScreen(),
         '/options': (context) => const OptionsScreen(),
@@ -97,19 +99,20 @@ class _AuthGateState extends State<AuthGate> {
     if (mounted) {
       if (session != null) {
         print('✓ Existing session found for user: ${session.user.email}');
+        // User is authenticated, show opening cinematic then go to menu
+        Navigator.of(context).pushReplacementNamed(
+          '/cinematic',
+          arguments: {
+            'videoPath':
+                'assets/cinematicas/Pixel_Art_Hero_s_Melancholic_Journey.mp4',
+            'nextRoute': '/menu',
+          },
+        );
       } else {
-        print('✗ No session found, allowing guest access');
+        print('✗ No session found, redirecting to login');
+        // No session, require login
+        Navigator.of(context).pushReplacementNamed('/login');
       }
-
-      // Always show opening cinematic first, then go to menu
-      Navigator.of(context).pushReplacementNamed(
-        '/cinematic',
-        arguments: {
-          'videoPath':
-              'assets/cinematicas/Pixel_Art_Hero_s_Melancholic_Journey.mp4',
-          'nextRoute': '/menu',
-        },
-      );
     }
   }
 
