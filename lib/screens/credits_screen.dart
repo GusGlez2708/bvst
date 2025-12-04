@@ -80,7 +80,7 @@ class _CreditsScreenState extends State<CreditsScreen> with WidgetsBindingObserv
                     // Game Design
                     _buildRole('DISEÑO DE JUEGO'),
                     _buildName('JAVIER ROBERTO ANCONA ALEJO'),
-                    _buildName('GUSTAVO ADOLFO GONZALES ROSAS'),
+                    _buildName('GUSTAVO ADOLFO GONZALEZ ROSAS'),
                     const SizedBox(height: 100),
 
                     // Programming
@@ -91,14 +91,14 @@ class _CreditsScreenState extends State<CreditsScreen> with WidgetsBindingObserv
 
                     // Art & Graphics
                     _buildRole('ARTE Y GRÁFICOS'),
-                    _buildName('GUSTAVO ADOLFO GONZALES ROSAS'),
+                    _buildName('GUSTAVO ADOLFO GONZALEZ ROSAS'),
                     _buildName('JAVIER ROBERTO ANCONA ALEJO'),
                     const SizedBox(height: 100),
 
                     // Sound Design
                     _buildRole('DISEÑO DE SONIDO'),
                     _buildName('ANGEL ERNESTO NAVA SANCHEZ'),
-                    _buildName('GUSTAVO ADOLFO GONZALES ROSAS'),
+                    _buildName('GUSTAVO ADOLFO GONZALEZ ROSAS'),
                     const SizedBox(height: 100),
 
                     // Level Design
@@ -109,20 +109,20 @@ class _CreditsScreenState extends State<CreditsScreen> with WidgetsBindingObserv
 
                     // Story
                     _buildRole('HISTORIA'),
-                    _buildName('GUSTAVO ADOLFO GONZALES ROSAS'),
+                    _buildName('GUSTAVO ADOLFO GONZALEZ ROSAS'),
                     _buildName('JAVIER ROBERTO ANCONA ALEJO'),
                     const SizedBox(height: 100),
 
                     // UI/UX Design
                     _buildRole('DISEÑO DE INTERFAZ'),
-                    _buildName('GUSTAVO ADOLFO GONZALES ROSAS'),
+                    _buildName('GUSTAVO ADOLFO GONZALEZ ROSAS'),
                     _buildName('ANGEL ERNESTO NAVA SANCHEZ'),
                     const SizedBox(height: 100),
 
                     // Game Testing
                     _buildRole('PRUEBAS DE JUEGO'),
                     _buildName('JAVIER ROBERTO ANCONA ALEJO'),
-                    _buildName('GUSTAVO ADOLFO GONZALES ROSAS'),
+                    _buildName('GUSTAVO ADOLFO GONZALEZ ROSAS'),
                     const SizedBox(height: 100),
 
                     // Additional Design (Solo Bryan)
