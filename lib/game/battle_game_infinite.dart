@@ -110,9 +110,12 @@ class BattleGameInfinite extends BattleGame {
   }
 
   List<int> _getBossesForRound(int round) {
-    if (round <= 5) {
-      // Rounds 1-5: Single bosses
+    if (round <= 3) {
+      // Rounds 1-3: Bosses 1, 2, 3
       return [round];
+    } else if (round <= 5) {
+      // Rounds 4-5: Boss 5 (skip boss 4 to avoid bugs)
+      return [5];
     } else if (round == 6) {
       // Round 6: Boss 1 + 2
       return [1, 2];
@@ -120,11 +123,11 @@ class BattleGameInfinite extends BattleGame {
       // Round 7: Boss 1 + 2 + 3
       return [1, 2, 3];
     } else if (round == 8) {
-      // Round 8: Boss 1 + 2 + 3 + 4
-      return [1, 2, 3, 4];
+      // Round 8: Boss 1 + 2 + 3 + 5 (skip boss 4)
+      return [1, 2, 3, 5];
     } else {
-      // Round 9+: All 5 bosses
-      return [1, 2, 3, 4, 5];
+      // Round 9+: Bosses 1, 2, 3, 5, 5 (no boss 4)
+      return [1, 2, 3, 5, 5];
     }
   }
 
