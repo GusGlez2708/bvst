@@ -2,7 +2,6 @@ import 'package:bvst/game/audio_manager.dart';
 import 'package:bvst/services/progress_service.dart'; // Import ProgressService
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // <- For session check
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -63,17 +62,6 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
                 _buildStyledButton(
                   text: 'JUGAR',
                   onTap: () async {
-                    // Check if user is logged in
-                    final session =
-                        Supabase.instance.client.auth.currentSession;
-                    if (session == null) {
-                      // Redirect to login
-                      if (context.mounted) {
-                        Navigator.pushNamed(context, '/login');
-                      }
-                      return;
-                    }
-
                     // AudioManager().playUiSfx('start.mp3'); // <- REMOVED: User requested BGM only
 
                     final progressService = ProgressService();
@@ -123,14 +111,6 @@ class _MenuScreenState extends State<MenuScreen> with WidgetsBindingObserver {
                 _buildStyledButton(
                   text: 'MODO INFINITO',
                   onTap: () {
-                    // Check if user is logged in
-                    final session =
-                        Supabase.instance.client.auth.currentSession;
-                    if (session == null) {
-                      // Redirect to login
-                      Navigator.pushNamed(context, '/login');
-                      return;
-                    }
                     Navigator.pushNamed(context, '/game_infinite');
                   },
                 ),

@@ -43,6 +43,7 @@ class _GameScreenInfiniteState extends State<GameScreenInfinite>
               'hasWon': false,
               'currentLevel': 0, // Special level for infinite mode
               'score': _game.score, // Pass score
+              'round': _game.currentRound, // Pass actual round
             },
           );
         }

@@ -30,6 +30,10 @@ void main() async {
     url: 'https://hcuwpzbhyvieotntwdtc.supabase.co',
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhjdXdwemJoeXZpZW90bnR3ZHRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0ODUyMjUsImV4cCI6MjA3OTA2MTIyNX0.5jQQHXpiw74_QhhCPOC3UDWufXBzF9Ao4NoWIgLN56Q',
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce,
+      autoRefreshToken: true,
+    ),
   );
   // ------------------------
 

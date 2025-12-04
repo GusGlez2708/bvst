@@ -17,6 +17,7 @@ class _ResultScreenState extends State<ResultScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   bool _isButtonEnabled = false;
+  bool _scoreSaved = false; // Track if score was saved
 
   @override
   void initState() {
@@ -59,15 +60,8 @@ class _ResultScreenState extends State<ResultScreen>
         await progressService.saveLevel(nextLevelToSave);
       }
 
-      // Save infinite mode score (currentLevel == 0 indicates infinite mode)
-      if (currentLevel == 0 && !hasWon) {
-        final int score = args['score'] ?? 0;
-        final scoreService = ScoreService();
-        // Round is passed from BattleGameInfinite
-        final int round = score ~/ 150; // Approximate if not passed
-        await scoreService.saveInfiniteScore(score, round);
-        print('📊 Infinite mode score saved: $score (Round $round)');
-      }
+      // Don't auto-save infinite mode score - show dialog instead
+      // The dialog will be shown in the UI when buttons are enabled
 
       // Show ad only if NOT level 1 (or if you want to show it on game over regardless of level, adjust logic)
       // User request: "solo quiero que cambies el del nivel 1, quiero que lo quites"
@@ -198,6 +192,23 @@ class _ResultScreenState extends State<ResultScreen>
                             : null,
                       ),
                     ),
+                  // GUARDAR SCORE button - only for infinite mode
+                  if (currentLevel == 0 && !hasWon && !_scoreSaved)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20.0),
+                      child: _buildStyledButton(
+                        text: 'GUARDAR SCORE',
+                        colors: (
+                          button: const Color(0xFFFFD700), // Gold
+                          text: Colors.black,
+                          border: const Color(0xFFFFA500),
+                        ),
+                        opacity: _fadeAnimation.value,
+                        onTap: _isButtonEnabled
+                            ? () => _showSaveScoreDialog(context, args)
+                            : null,
+                      ),
+                    ),
                   _buildStyledButton(
                     text: buttonText,
                     colors: (
@@ -318,5 +329,132 @@ class _ResultScreenState extends State<ResultScreen>
         ],
       ),
     );
+  }
+
+  /// Show save score confirmation dialog
+  Future<void> _showSaveScoreDialog(
+    BuildContext context,
+    Map<String, dynamic> args,
+  ) async {
+    final int score = args['score'] ?? 0;
+    final int round = args['round'] ?? 1; // Use actual round from game
+
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF0D1B2A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: Color(0xFF61E2FF), width: 2),
+          ),
+          title: Text(
+            '¿GUARDAR PUNTAJE?',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.orbitron(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF61E2FF),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Score: $score',
+                style: GoogleFonts.orbitron(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFFFFD700),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Ronda: $round',
+                style: GoogleFonts.orbitron(
+                  fontSize: 16,
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '¿Deseas guardar este puntaje en el leaderboard?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.orbitron(
+                  fontSize: 12,
+                  color: Colors.white70,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'NO',
+                style: GoogleFonts.pressStart2p(
+                  fontSize: 12,
+                  color: Colors.red,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4FA0E4),
+              ),
+              child: Text(
+                'SÍ, GUARDAR',
+                style: GoogleFonts.pressStart2p(
+                  fontSize: 10,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true && mounted) {
+      // Save the score
+      final scoreService = ScoreService();
+      final success = await scoreService.saveInfiniteScore(score, round);
+
+      if (success) {
+        setState(() {
+          _scoreSaved = true;
+        });
+
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '¡Score guardado exitosamente!',
+                style: GoogleFonts.orbitron(color: Colors.white),
+              ),
+              backgroundColor: const Color(0xFF4CAF50),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        // Show error message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Error al guardar el score',
+                style: GoogleFonts.orbitron(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    }
   }
 }

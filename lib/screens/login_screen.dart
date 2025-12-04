@@ -3,6 +3,7 @@ import 'package:bvst/game/audio_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,6 +47,9 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         if (signInResponse.user != null) {
+          // Save username locally for score tracking
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('player_username', username);
           _onAuthSuccess();
         }
       } on AuthException catch (authError) {
@@ -79,6 +83,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (signUpResponse.user != null) {
         print('User registered: $username');
+        // Save username locally for score tracking
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('player_username', username);
         _onAuthSuccess();
       }
     } catch (e) {
@@ -160,7 +167,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // Botón de Login/Registro
                   _isLoading
-                      ? const CircularProgressIndicator(color: Color(0xFF61E2FF))
+                      ? const CircularProgressIndicator(
+                          color: Color(0xFF61E2FF),
+                        )
                       : _buildStyledButton(
                           text: 'ACCEDER / REGISTRAR',
                           onTap: _handleAuth,
